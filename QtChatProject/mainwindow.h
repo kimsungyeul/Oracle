@@ -7,6 +7,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#include <QSqlDatabase>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -32,8 +34,6 @@ private slots:
     void on_actionOrder_triggered();        // OrderAction 트리거시 실행되는 슬롯
 
     void on_actionServer_triggered();       // ServerAction 트리거시 실행되는 슬롯
-
-    bool createConnection();
 
 private:
     Ui::MainWindow *ui;                     // MainWindow Ui 멤버변수

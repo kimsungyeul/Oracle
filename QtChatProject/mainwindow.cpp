@@ -12,8 +12,6 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 {
     ui->setupUi(this);
 
-    if (!createConnection( )) return;
-
     clientForm = new ClientManagerForm(this);                           // ClientManagerForm 객체생성후 부모를 MainWindow로 지정
     clientForm->setWindowTitle(tr("Client Info"));                      // 객체 Ui의 타이틀을 Client Info로 지정
     connect(clientForm, SIGNAL(destroyed()),                            // clientForm의 객체소멸시그널을 객체 Ui 삭제 시그널이이 올때까지 대기
@@ -83,6 +81,15 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 MainWindow::~MainWindow()                                               // MainWindow 소멸자
 {
     delete ui;
+    delete chatserverForm;
+    delete clientForm;
+    delete productForm;
+    delete orderForm;
+
+    QStringList list = QSqlDatabase::connectionNames();
+    for(int i = 0; i < list.count(); ++i) {
+        QSqlDatabase::removeDatabase(list[i]);
+    }
 }
 
 void MainWindow::on_actionClient_triggered()                            // Client Action이 trigger시 실행되는 슬롯
@@ -113,19 +120,4 @@ void MainWindow::on_actionServer_triggered()                            // Serve
     if(chatserverForm != nullptr) {                                     // chatserverForm이 비어있지않다면
         chatserverForm->setFocus();                                     // chatserverForm으로 Window창 초점이 맞춰짐
     }
-}
-
-bool MainWindow::createConnection()
-{
-    QSqlDatabase db = QSqlDatabase::addDatabase("QODBC");
-    db.setDatabaseName("Oracle11gx64");
-    db.setUserName("itemmanage");
-    db.setPassword("1234");
-    if (!db.open()) {
-        qDebug() << db.lastError().text();
-    } else {
-        qDebug("success");
-    }
-
-    return true;
 }

@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlTableModel>
 
 #include "clientitem.h"
 
@@ -39,11 +40,8 @@ private slots:
     void on_searchPushButton_clicked();                                         // Search버튼 - Item검색
     void on_deletePushButton_clicked();                                         // Delete버튼 - Item삭제
 
-    void on_searchTreeWidget_itemClicked(QTreeWidgetItem *item, int column);    // TreeWidget의검색창 선택버튼 - 검색메뉴로 선택됨
-
-    void on_clienttreeWidget_itemClicked(QTreeWidgetItem *item, int column);    // TreeWidget의고객창 선택버튼 - 고객메뉴로 선택됨
-
-    void on_clienttreeView_clicked(const QModelIndex &index);
+    void on_clienttreeView_clicked(const QModelIndex &index);                   // TreeView의고객창 선택버튼 - 고객메뉴로 선택됨
+    void on_searchTreeView_doubleClicked(const QModelIndex &index);             // TreeView의검색창 선택버튼 - 검색메뉴로 선택됨
 
 signals:
     void clientAdded(int,QString);                                              // 고객을 추가하기위한 시그널
@@ -58,8 +56,9 @@ private:
     Ui::ClientManagerForm *ui;                                                  // Ui를 사용하기위한 멤버변수
     QMenu* menu;                                                                // Action을 동작하기위한 메뉴생성 멤버변수
 
-    QSqlQueryModel* queryModel;
-    QSqlQueryModel* squeryModel;
+    QSqlTableModel* clientModel;
+    QSqlTableModel* sclientModel;
+
 };
 
 #endif // CLIENTMANAGERFORM_H

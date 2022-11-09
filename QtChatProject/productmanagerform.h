@@ -7,6 +7,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlTableModel>
 
 #include "productitem.h"
 
@@ -42,11 +43,11 @@ private slots:
 
     void on_addPushButton_clicked();
 
-    void on_searchTreeWidget_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_deletePushButton_clicked();
 
-    void on_producttreeWidget_itemClicked(QTreeWidgetItem *item, int column);
+    void on_producttreeView_clicked(const QModelIndex &index);
+
+    void on_searchTreeView_doubleClicked(const QModelIndex &index);
 
 signals:
     void productAdded(QString);
@@ -61,7 +62,8 @@ private:
     Ui::ProductManagerForm *ui;
     QMenu* menu;
 
-    QSqlQueryModel* queryModel;
+    QSqlTableModel* productModel;
+    QSqlTableModel* sproductModel;
 };
 
 #endif // PRODUCTMANAGERFORM_H
