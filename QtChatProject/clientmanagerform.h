@@ -47,7 +47,7 @@ signals:
     void clientAdded(int,QString);                                              // 고객을 추가하기위한 시그널
 
     void clientDataListSent(QList<QString>);                                    // ClientList를 OrderForm에 전달하기위한 시그널
-    void clientFindDataSent(ClientItem*);                                       // Client에서 찾은 Item항목을 OrderForm으로 전달하기위한 시그널
+    void clientFindDataSent(int,QString,QString,QString);                                       // Client에서 찾은 Item항목을 OrderForm으로 전달하기위한 시그널
 
 private:
     int makeId();                                                               // Client Id를 부여하기위한 멤버함수
@@ -58,7 +58,6 @@ private:
 
     QSqlTableModel* clientModel;
     QSqlTableModel* sclientModel;
-
 };
 
 #endif // CLIENTMANAGERFORM_H

@@ -52,8 +52,10 @@ private slots:
 signals:
     void productAdded(QString);
     void productDataListSent(QList<QString>);
-    void productFindDataSent(ProductItem*);
+    void productFindDataSent(int,QString,int,int);
     void productIdDataSent(ProductItem*);
+
+    void udstockSend(int);
 
 private:
     int makePId();

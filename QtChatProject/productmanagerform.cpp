@@ -36,8 +36,8 @@ void ProductManagerForm::loadData()
         query.exec("CREATE TABLE IF NOT EXISTS productitem("
                    "p_id INTEGER Primary Key, "
                    "p_name VARCHAR(30) NOT NULL, "
-                   "p_price VARCHAR(20) NOT NULL, "
-                   "p_stock VARCHAR(50));");
+                   "p_price INTEGER, "
+                   "p_stock INTEGER);");
 
         productModel = new QSqlTableModel(this, db);
         productModel->setTable("productitem");
@@ -61,10 +61,10 @@ void ProductManagerForm::loadData()
         ui->producttreeView->setRootIsDecorated(false);
         ui->searchTreeView->setRootIsDecorated(false);
 
-        for(int i=0;i<productModel->columnCount();i++){
-            ui->producttreeView->resizeColumnToContents(i);
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
+        //        for(int i=0;i<productModel->columnCount();i++){
+        //            //ui->producttreeView->resizeColumnToContents(i);
+        //            ui->searchTreeView->resizeColumnToContents(i);
+        //        }
     }
 
     //    for(int i = 0; i < productModel->rowCount(); i++) {
@@ -87,7 +87,7 @@ ProductManagerForm::~ProductManagerForm()
 int ProductManagerForm::makePId( )
 {
     if(productModel->rowCount() == 0) {                                               // clientList의 데이터가 없다면
-        return 1000;                                                            // id를 1000번부터 부여
+        return 8000;                                                            // id를 1000번부터 부여
     } else {
         int lastNum = productModel->rowCount();
         auto pid = productModel->data(productModel->index(lastNum-1, 0)).toInt();             // clientList의 마지막값을 id로 가져와
@@ -125,25 +125,25 @@ void ProductManagerForm::on_searchPushButton_clicked()
     switch (i) {
     case 0:
         sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_id = %1").arg(sch),db);
-        for(int i=0;i<productModel->columnCount();i++){
+        for(int i=0;i<sproductModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
         break;
     case 1:
         sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_name like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<productModel->columnCount();i++){
+        for(int i=0;i<sproductModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
         break;
     case 2:
         sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_price like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<productModel->columnCount();i++){
+        for(int i=0;i<sproductModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
         break;
     case 3:
         sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_stock like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<productModel->columnCount();i++){
+        for(int i=0;i<sproductModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
         break;
@@ -173,9 +173,9 @@ void ProductManagerForm::on_modifyPushButton_clicked()
         productModel->setData(model.siblingAtColumn(3), stock);
         productModel->submit();
 
-        for(int i=0;i<productModel->columnCount();i++){
-            ui->producttreeView->resizeColumnToContents(i);
-        }
+        //        for(int i=0;i<productModel->columnCount();i++){
+        //            ui->producttreeView->resizeColumnToContents(i);
+        //        }
     }
 }
 
@@ -197,9 +197,9 @@ void ProductManagerForm::on_addPushButton_clicked()
         query.bindValue(3, stock);
         query.exec();
         productModel->select();
-        for(int i=0;i<productModel->columnCount();i++){
-            ui->producttreeView->resizeColumnToContents(i);
-        }
+        //        for(int i=0;i<productModel->columnCount();i++){
+        //            ui->producttreeView->resizeColumnToContents(i);
+        //        }
         //emit clientAdded(id, name);
     }
 }
@@ -211,54 +211,75 @@ void ProductManagerForm::on_deletePushButton_clicked()
 
 void ProductManagerForm::productIdListData(int index)
 {
-//    ui->searchTreeWidget->clear();
-//    QString PIdstr;
-//    QList<QString> PIdList;
+    //ui->searchTreeWidget->clear();
+    QString PIdstr;
+    QList<QString> PIdList;
 
-//    int sentpid;
-//    QString sentpname;
+    for(int i = 0; i < productModel->rowCount(); i++) {
+        QString pid = productModel->data(productModel->index(i, 0)).toString();
+        QString pname = productModel->data(productModel->index(i, 1)).toString();
+        PIdstr = QString("%1, %2").arg(pid).arg(pname);                             // "ID, 이름" 형태의 QString형 변수 저장
+        PIdList.append(PIdstr);
+    }
 
-//    for (const auto& v : productList) {
-//        ProductItem* p = v;
-//        sentpid = p->pid();
-//        sentpname = p->getPName();
-
-//        PIdstr = QString("%1, %2").arg(sentpid).arg(sentpname);
-//        PIdList.append(PIdstr);
-//    }
-
-//    emit productDataListSent(PIdList);
+    emit productDataListSent(PIdList);
 }
 
 void ProductManagerForm::productNameListData(QString pname)
 {
-//    ui->searchTreeWidget->clear();
+    //ui->searchTreeWidget->clear();
 
-//    auto items = ui->producttreeWidget->findItems(pname,Qt::MatchCaseSensitive|Qt::MatchContains,1);
+    //auto items = ui->producttreeWidget->findItems(pname,Qt::MatchCaseSensitive
+    //                                              |Qt::MatchContains,1);
 
-//    foreach(auto i, items) {
-//        ProductItem* p = static_cast<ProductItem*>(i);
-//        int pid = p->pid();
-//        QString pname = p->getPName();
-//        int price = p->getPrice();
-//        int stock = p->getStock();
-//        ProductItem* item = new ProductItem(pid, pname, price, stock);
-//        emit productFindDataSent(item);
-//    }
+    QSqlDatabase db = QSqlDatabase::database("productitemConnection");
+    sproductModel->QSqlQueryModel::setQuery(QString("select * "
+                                                    "from productitem "
+                                                    "where p_name "
+                                                    "like '%%1%' "
+                                                    "order by p_id").arg(pname),db);
+    for(int i = 0; i < sproductModel->rowCount(); i++) {
+        int pid = sproductModel->data(productModel->index(i, 0)).toInt();
+        QString pname = sproductModel->data(productModel->index(i, 1)).toString();
+        int price = sproductModel->data(productModel->index(i, 2)).toInt();
+        int stock = sproductModel->data(productModel->index(i, 3)).toInt();
+        emit productFindDataSent(pid,pname,price,stock);
+    }
+    //    foreach(auto i, items) {
+    //        ProductItem* p = static_cast<ProductItem*>(i);
+    //        int pid = p->pid();
+    //        QString pname = p->getPName();
+    //        int price = p->getPrice();
+    //        int stock = p->getStock();
+    //        ProductItem* item = new ProductItem(pid, pname, price, stock);
+    //        emit productFindDataSent(item);
+    //    }
 }
 
 void ProductManagerForm::productItemRecv(int pid)
 {
-//    ProductItem* productData = productList[pid];
+    //    ProductItem* productData = productList[pid];
 
-//    emit productIdDataSent(productData);
+    //    emit productIdDataSent(productData);
 }
 
 void ProductManagerForm::productStockUp(int pid,int amount)
 {
-//    ProductItem* productData = productList[pid];
-//    int updateStock = productData->getStock() - amount;
-//    productData->setStock(updateStock);
+    QSqlDatabase db = QSqlDatabase::database("productitemConnection");
+    QSqlTableModel query(nullptr,db);
+    query.QSqlQueryModel::setQuery(QString("select * "
+                                           "from productitem "
+                                           "where p_id = '%1'").arg(pid),db);
+    int updateStock = query.data(query.index(0, 3)).toInt() - amount;
+    query.QSqlQueryModel::setQuery(QString("update productitem "
+                                           "set p_stock = '%1'"
+                                           "where p_id = '%2'").arg(updateStock).arg(pid),db);
+    query.submit();
+    productModel->QSqlQueryModel::setQuery(QString("select * "
+                                                   "from productitem"),db);
+    productModel->submit();
+
+    emit udstockSend(updateStock);
 }
 
 void ProductManagerForm::on_producttreeView_clicked(const QModelIndex &index)

@@ -125,7 +125,7 @@
               </sizepolicy>
              </property>
              <property name="currentText">
-              <string/>
+              <string>--Product Select--</string>
              </property>
              <property name="placeholderText">
               <string extracomment="Product Select"/>
@@ -374,7 +374,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QTreeWidget" name="ordertreeWidget">
+     <widget class="QTreeView" name="ordertreeView">
       <property name="enabled">
        <bool>true</bool>
       </property>
@@ -384,36 +384,6 @@
       <property name="rootIsDecorated">
        <bool>false</bool>
       </property>
-      <column>
-       <property name="text">
-        <string notr="true">OID</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ClientName(CID)</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ProductName(PID)</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Amount</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>TotalPrice</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Date</string>
-       </property>
-      </column>
      </widget>
     </widget>
    </item>

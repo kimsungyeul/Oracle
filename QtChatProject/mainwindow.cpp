@@ -48,8 +48,8 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 
     connect(orderForm, SIGNAL(clientDataSent(QString)),                 // name를 받아와서 ClientManager에 원하는 인자 전해줘서 리스트 검색
             clientForm, SLOT(clientNameListData(QString)));
-    connect(clientForm, SIGNAL(clientFindDataSent(ClientItem*)),        // OrderManagerForm에서 선택된 리스트를 ClientManagerForm에 요청해 매칭된데이터 받기위한 connect
-            orderForm, SLOT(clientFindDataRecv(ClientItem*)));
+    connect(clientForm, SIGNAL(clientFindDataSent(int,QString,QString,QString)),        // OrderManagerForm에서 선택된 리스트를 ClientManagerForm에 요청해 매칭된데이터 받기위한 connect
+            orderForm, SLOT(clientFindDataRecv(int,QString,QString,QString)));
 
     connect(orderForm, SIGNAL(productDataSent(int)),                    // Qstring을 받아와서 ProductManager에 원하는 인자 전해줘서 리스트 검색
             productForm, SLOT(productIdListData(int)));
@@ -58,8 +58,8 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 
     connect(orderForm, SIGNAL(productDataSent(QString)),                // productname를 받아와서 ProductManager에 원하는 인자 전해줘서 리스트 검색
             productForm, SLOT(productNameListData(QString)));
-    connect(productForm, SIGNAL(productFindDataSent(ProductItem*)),     // ProductManagerForm에서 선택된 Item을 OrderManagerForm으로 전달
-            orderForm, SLOT(productFindDataRecv(ProductItem*)));
+    connect(productForm, SIGNAL(productFindDataSent(int,QString,int,int)),     // ProductManagerForm에서 선택된 Item을 OrderManagerForm으로 전달
+            orderForm, SLOT(productFindDataRecv(int,QString,int,int)));
 
     connect(orderForm, SIGNAL(getProductItemSent(int)),                 // 선택된 ProductItem의 Product Id를 뽑아 ProductManager에서 검색
             productForm, SLOT(productItemRecv(int)));
@@ -69,6 +69,8 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
     connect(orderForm, SIGNAL(stockUpdate(int,int)),                    // OrderManagerForm의 Stock Update 시그널시 ProductManagerForm의 Stock Update용 connect
             productForm, SLOT(productStockUp(int,int)));
 
+    connect(productForm, SIGNAL(udstockSend(int)),
+            orderForm, SLOT(udstockRecv(int)));
 
     connect(clientForm, SIGNAL(clientAdded(int, QString)),              //ClientManager에서 리스트를 읽어올때 ChatServerForm의 ClientWidget에도 출력되기 위한 connect
             chatserverForm, SLOT(addClient(int, QString)));

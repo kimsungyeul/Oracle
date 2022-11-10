@@ -62,10 +62,9 @@ void ClientManagerForm::loadData()                                              
         ui->clienttreeView->setRootIsDecorated(false);
         ui->searchTreeView->setRootIsDecorated(false);
 
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->clienttreeView->resizeColumnToContents(i);
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
+//        for(int i=0;i<clientModel->columnCount();i++){
+//            ui->searchTreeView->resizeColumnToContents(i);
+//        }
     }
 
     //    for(int i = 0; i < clientModel->rowCount(); i++) {
@@ -118,9 +117,9 @@ void ClientManagerForm::removeItem()                                            
         //clientList.remove(clientModel->data(index.siblingAtColumn(0)).toInt());
         clientModel->removeRow(model.row());
         clientModel->select();
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->clienttreeView->resizeColumnToContents(i);
-        }
+//        for(int i=0;i<clientModel->columnCount();i++){
+//            ui->clienttreeView->resizeColumnToContents(i);
+//        }
     }
 }
 
@@ -159,7 +158,9 @@ void ClientManagerForm::on_searchPushButton_clicked()                           
 
     switch (i) {
     case 0:
-        sclientModel->QSqlQueryModel::setQuery(QString("select * from clientitem where c_id = %1").arg(sch),db);
+        sclientModel->QSqlQueryModel::setQuery(QString("select * "
+                                                       "from clientitem "
+                                                       "where c_id = %1").arg(sch),db);
         for(int i=0;i<clientModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
@@ -210,9 +211,9 @@ void ClientManagerForm::on_modifyPushButton_clicked()                           
         clientModel->setData(model.siblingAtColumn(3), address);
         clientModel->submit();
 
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->clienttreeView->resizeColumnToContents(i);
-        }
+//        for(int i=0;i<clientModel->columnCount();i++){
+//            ui->clienttreeView->resizeColumnToContents(i);
+//        }
     }
 }
 
@@ -233,9 +234,9 @@ void ClientManagerForm::on_addPushButton_clicked()                              
         query.bindValue(3, address);
         query.exec();
         clientModel->select();
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->clienttreeView->resizeColumnToContents(i);
-        }
+//        for(int i=0;i<clientModel->columnCount();i++){
+//            ui->clienttreeView->resizeColumnToContents(i);
+//        }
         //emit clientAdded(id, name);
     }
 }
@@ -247,41 +248,49 @@ void ClientManagerForm::on_deletePushButton_clicked()                           
 
 void ClientManagerForm::clientIdListData(int index)                             // ClientComoboBox의 Index에 따른 ClientList를 가져오기 위함
 {
-    /*    ui->searchTreeWidget->clear();                                              // searchTreeWidget 항목클리어
+    //ui->searchTreeWidget->clear();                                              // searchTreeWidget 항목클리어
     QString Idstr;                                                              // Id와 이름을 QString형으로 같이 저장하기위한 변수
     QList<QString> IdList;                                                      // Idstr인 QString을 저장하기위한 QList 변수
 
-    int sentid;                                                                 // clientList에서 찾은 항목에 id저장용 변수
-    QString sentname;                                                           // clientList에서 찾은 항목에 name저장용 변수
-
-    for (const auto& v : clientList) {                                          // clientList에 모든 항목들을 반복
-        ClientItem* c = v;                                                      // 뽑은 아이템을 ClientItem변수에 저장
-        sentid = c->id();                                                       // 뽑은 id값을 sentid변수에 저장
-        sentname = c->getName();                                                // 뽑은 name값을 sentname값변수에 저장
-
-        Idstr = QString("%1, %2").arg(sentid).arg(sentname);                    // "ID, 이름" 형태의 QString형 변수 저장
-        IdList.append(Idstr);                                                   // QList에 위에서 계산된 QString 항목 저장
+    for(int i = 0; i < clientModel->rowCount(); i++) {
+        QString id = clientModel->data(clientModel->index(i, 0)).toString();
+        QString name = clientModel->data(clientModel->index(i, 1)).toString();
+        Idstr = QString("%1, %2").arg(id).arg(name);                    // "ID, 이름" 형태의 QString형 변수 저장
+        IdList.append(Idstr);
     }
 
-    emit clientDataListSent(IdList);  */                                          // ClientList를 OrderForm에 전달하기위한 시그널
+//    for (const auto& v : clientList) {                                          // clientList에 모든 항목들을 반복
+//        ClientItem* c = v;                                                      // 뽑은 아이템을 ClientItem변수에 저장
+//        sentid = c->id();                                                       // 뽑은 id값을 sentid변수에 저장
+//        sentname = c->getName();                                                // 뽑은 name값을 sentname값변수에 저장
+
+//        Idstr = QString("%1, %2").arg(sentid).arg(sentname);                    // "ID, 이름" 형태의 QString형 변수 저장
+//        IdList.append(Idstr);                                                   // QList에 위에서 계산된 QString 항목 저장
+//    }
+
+    emit clientDataListSent(IdList);                                            // ClientList를 OrderForm에 전달하기위한 시그널
 }
 
 void ClientManagerForm::clientNameListData(QString name)                        // ClientComboBox의 name설정시 이름에따른 ClientList 가져오기 위함
 {
-    //    ui->searchTreeWidget->clear();                                              // searchTreeWidget 항목클리어
+    //ui->searchTreeWidget->clear();                                              // searchTreeWidget 항목클리어
 
-    //    auto items = ui->clienttreeWidget->findItems(name,Qt::MatchCaseSensitive    // clienttreeWidget에 name값 찾기
-    //                                                 |Qt::MatchContains,1);
+//    auto items = ui->clienttreeWidget->findItems(name,Qt::MatchCaseSensitive    // clienttreeWidget에 name값 찾기
+//                                                 |Qt::MatchContains,1);
+    QSqlDatabase db = QSqlDatabase::database("clientitemConnection");
+    sclientModel->QSqlQueryModel::setQuery(QString("select * "
+                                                   "from clientitem "
+                                                   "where c_name "
+                                                   "like '%%1%' "
+                                                   "order by c_id").arg(name),db);
 
-    //    foreach(auto i, items) {                                                    // 항목 iterater
-    //        ClientItem* c = static_cast<ClientItem*>(i);                            // 찾은 선택항목 item값 저장
-    //        int id = c->id();                                                       // 내부값에서 id얻기
-    //        QString name = c->getName();                                            // 내부값에서 name얻기
-    //        QString number = c->getPhoneNumber();                                   // 내부값에서 phonnumber얻기
-    //        QString address = c->getAddress();                                      // 내부값에서 address얻기
-    //        ClientItem* item = new ClientItem(id, name, number, address);           // 뽑아저 저장한 항목들을 새로운 아이템으로 저장
-    //        emit clientFindDataSent(item);                                          // 데이터를 뽑아 저장된 Item항목을 Order로 보내기위한 시그널
-    //    }
+    for(int i = 0; i < sclientModel->rowCount(); i++) {
+        int id = sclientModel->data(clientModel->index(i, 0)).toInt();
+        QString name = sclientModel->data(clientModel->index(i, 1)).toString();
+        QString number = sclientModel->data(clientModel->index(i, 2)).toString();
+        QString address = sclientModel->data(clientModel->index(i, 3)).toString();
+        emit clientFindDataSent(id,name,number,address);
+    }
 }
 
 

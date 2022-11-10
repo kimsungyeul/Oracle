@@ -5,6 +5,11 @@
 #include "productitem.h"
 #include <QWidget>
 #include <QHash>
+#include <QSqlQueryModel>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QSqlTableModel>
 
 #include "orderitem.h"
 
@@ -30,11 +35,13 @@ public:
 public slots:
 
     void clientDataListRecv(QList<QString>);
-    void clientFindDataRecv(ClientItem*);
+    void clientFindDataRecv(int,QString,QString,QString);
 
     void productDataListRecv(QList<QString>);
-    void productFindDataRecv(ProductItem*);
+    void productFindDataRecv(int,QString,int,int);
     void getProductIdDataRecv(ProductItem*);
+
+    void udstockRecv(int);
 
 private slots:
     void showContextMenu(const QPoint &);
@@ -79,6 +86,10 @@ private:
     QMap<int, OrderItem*> orderList;
     Ui::OrderManagerForm *ui;
     QMenu* menu;
+
+    QSqlTableModel* orderModel;
+    QSqlTableModel* scoModel;
+    QSqlTableModel* spoModel;
 };
 
 #endif // ORDERMANAGERFORM_H
