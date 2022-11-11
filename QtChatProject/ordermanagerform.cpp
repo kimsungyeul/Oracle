@@ -1,5 +1,4 @@
 #include "ordermanagerform.h"
-#include "orderitem.h"
 #include "ui_ordermanagerform.h"
 
 #include <QFile>
@@ -90,7 +89,6 @@ void OrderManagerForm::removeItem()
     QModelIndex model = ui->ordertreeView->currentIndex();                     // 선택된 항목을 저장
     QSqlDatabase db = QSqlDatabase::database("orderitemConnection");
     if(db.isOpen() && model.isValid()) {
-        //clientList.remove(clientModel->data(index.siblingAtColumn(0)).toInt());
         orderModel->removeRow(model.row());
         orderModel->select();
     }
@@ -241,7 +239,6 @@ void OrderManagerForm::on_producttreeWidget_itemDoubleClicked(QTreeWidgetItem *i
 
 void OrderManagerForm::on_addpushButton_clicked()
 {
-    //QTreeWidgetItem* row = new QTreeWidgetItem(ui->ordertreeWidget);
     QString citemname = ui->nameLineEdit->text();
     QString pitemname = ui->pnameLineEdit->text();
     // Order Number
@@ -307,10 +304,6 @@ void OrderManagerForm::getProductIdDataRecv(int pid, QString pname, QString pric
     }
     ui->producttreeWidget->addTopLevelItem(item);
 
-    //    for(int i = 0; i < ui->clienttreeWidget->columnCount(); i++){
-    //        ui->clienttreeWidget->resizeColumnToContents(i);
-    //    }
-
     QString maxstock = item->text(3);
     ui->priceLineEdit->setText(item->text(2));
     ui->amountspinBox->setMaximum(maxstock.toInt());
@@ -329,7 +322,6 @@ void OrderManagerForm::on_modifypushButton_clicked()
 
     if(model.isValid() != NULL) {
         int befamount, afamount, totalPrice;
-        QString cname,pname;
 
         int pid = model.sibling(model.row(),3).data().toInt();;
 
@@ -359,7 +351,6 @@ void OrderManagerForm::udstockRecv(int stock)
 
 void OrderManagerForm::on_ordertreeView_clicked(const QModelIndex &index)
 {
-    int clientID = index.sibling(index.row(),1).data().toInt();
     int productID = index.sibling(index.row(),3).data().toInt();
 
     emit getProductItemSent(productID);

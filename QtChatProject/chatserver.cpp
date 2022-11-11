@@ -71,13 +71,16 @@ ChatServer::ChatServer(QWidget *parent) :
     chatmenu->addAction(removeAction);
     ui->chatTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 
-
     progressDialog = new QProgressDialog(0);
     progressDialog->setAutoClose(true);
     progressDialog->reset();
 
     logThread = new LogThread(this);
     logThread->start();
+
+    notice = new ChatNoticeDetails;
+    connect(notice, SIGNAL(closeNotice()), SLOT([this](){ qDebug("1"); }));
+    //notice = new ChatNoticeDetails;
 
     qDebug() << tr("The server is running on port %1.").arg(chatServer->serverPort());
 }
@@ -153,6 +156,7 @@ void ChatServer::receiveData( )
             ui->clientTreeWidget->update();
         }
         ui->chatTreeWidget->addTopLevelItem(saveitem);
+
         ui->chatTreeWidget->resizeColumnToContents(0);
     }
         break;
@@ -375,7 +379,9 @@ void ChatServer::on_clientTreeWidget_customContextMenuRequested(const QPoint &po
     }
 
     QPoint globalPos = ui->clientTreeWidget->mapToGlobal(pos);
-    menu->exec(globalPos);
+    if(ui->clientTreeWidget->indexAt(pos).isValid()){
+        menu->exec(globalPos);
+    }
 }
 
 void ChatServer::on_chatTreeWidget_customContextMenuRequested(const QPoint &pos)
@@ -385,7 +391,9 @@ void ChatServer::on_chatTreeWidget_customContextMenuRequested(const QPoint &pos)
     }
 
     QPoint globalPos = ui->chatTreeWidget->mapToGlobal(pos);
-    chatmenu->exec(globalPos);
+    if(ui->chatTreeWidget->indexAt(pos).isValid()){
+       chatmenu->exec(globalPos);
+    }
 }
 
 void ChatServer::acceptConnection()
@@ -500,7 +508,6 @@ void ChatServer::privateChatSend(QString name, QString str)
     ui->messageTreeWidget->addTopLevelItem(logitem);
 }
 
-
 void ChatServer::on_noticepushButton_clicked()
 {
     if (clientNameHash.count() == 0) {
@@ -510,15 +517,40 @@ void ChatServer::on_noticepushButton_clicked()
     }
 
     ui->noticepushButton->setEnabled(false);
+    notice = new ChatNoticeDetails;
+    notice->setClientList(clientNameHash);
 
-    QList<QTreeWidgetItem*> clientnameList;
-
-
-    ChatNoticeDetails* notice = new ChatNoticeDetails(clientnameList);
-
-    connect(notice, SIGNAL(sendData(QString,QString)), SLOT(privateChatSend(QString,QString)));
-
+    connect(notice, SIGNAL(sendData(QString,QString)), SLOT(noticeChatSend(QString,QString)));
+    //connect(notice, SIGNAL(closeNotice()), [](){ qDebug("1"); });
     notice->setWindowTitle("Notice Chat");
     notice->show();
 }
 
+void ChatServer::noticeChatSend(QString name, QString str)
+{
+    QTcpSocket* sock = clientSocketHash[name];
+    quint16 port = sock->peerPort();
+    QByteArray sendArray;
+    sendArray.clear();
+    QDataStream out(&sendArray, QIODevice::WriteOnly);
+    out << Chat_Notice;
+    sendArray.append("<font color=green>");
+    sendArray.append("***Notice***");
+    sendArray.append("</font> : ");
+    sendArray.append(str.toStdString().data());
+    sock->write(sendArray);
+
+
+    QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);
+    logitem->setText(1, QString::number(port));
+    logitem->setText(2, "Notice");
+    logitem->setText(3, "Admin");
+    logitem->setText(4, str);
+    logitem->setText(5, QDateTime::currentDateTime().toString());
+    logitem->setToolTip(4, str);
+
+    for(int i = 0; i < ui->messageTreeWidget->columnCount(); i++)
+        ui->messageTreeWidget->resizeColumnToContents(i);
+
+    ui->messageTreeWidget->addTopLevelItem(logitem);
+}

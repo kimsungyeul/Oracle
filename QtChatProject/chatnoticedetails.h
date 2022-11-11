@@ -13,8 +13,16 @@ class ChatNoticeDetails : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChatNoticeDetails(QList<QTreeWidgetItem*>, QWidget *parent = nullptr);
+    explicit ChatNoticeDetails(QWidget *parent = nullptr);
     ~ChatNoticeDetails();
+
+    void setClientList(QHash<quint16, QString>);
+
+protected:
+    void closeEvent(QCloseEvent*) override;
+
+signals:
+    void closeNotice();
 
 private:
     Ui::ChatNoticeDetails *ui;

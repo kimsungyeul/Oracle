@@ -8,10 +8,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlTableModel>
+#include <QStandardItemModel>
 
-#include "productitem.h"
-
-class ProductItem;
 class QMenu;
 class QTreeWidgetItem;
 
@@ -60,12 +58,11 @@ signals:
 private:
     int makePId();
 
-    QMap<int, ProductItem*> productList;
     Ui::ProductManagerForm *ui;
     QMenu* menu;
 
     QSqlTableModel* productModel;
-    QSqlTableModel* sproductModel;
+    QStandardItemModel* sproductModel;
 };
 
 #endif // PRODUCTMANAGERFORM_H

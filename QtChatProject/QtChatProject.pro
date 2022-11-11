@@ -12,27 +12,21 @@ SOURCES += \
     chatnoticedetails.cpp \
     chatserver.cpp \
     chatserveradmin.cpp \
-    clientitem.cpp \
     clientmanagerform.cpp \
     logthread.cpp \
     main.cpp \
     mainwindow.cpp \
-    orderitem.cpp \
     ordermanagerform.cpp \
-    productitem.cpp \
     productmanagerform.cpp
 
 HEADERS += \
     chatnoticedetails.h \
     chatserver.h \
     chatserveradmin.h \
-    clientitem.h \
     clientmanagerform.h \
     logthread.h \
     mainwindow.h \
-    orderitem.h \
     ordermanagerform.h \
-    productitem.h \
     productmanagerform.h
 
 FORMS += \

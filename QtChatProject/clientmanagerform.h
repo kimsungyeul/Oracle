@@ -10,9 +10,6 @@
 #include <QSqlTableModel>
 #include <QStandardItemModel>
 
-#include "clientitem.h"
-
-class ClientItem;                                                               // ClientItem클래스 참조
 class QMenu;                                                                    // QMenu클래스 참조
 class QTreeWidgetItem;                                                          // QTreeWidgetItem
 
@@ -53,12 +50,11 @@ signals:
 private:
     int makeId();                                                               // Client Id를 부여하기위한 멤버함수
 
-    QMap<int, ClientItem*> clientList;                                          // Id값에따라 CLientItem을 Qmap으로 저장하기위함
     Ui::ClientManagerForm *ui;                                                  // Ui를 사용하기위한 멤버변수
     QMenu* menu;                                                                // Action을 동작하기위한 메뉴생성 멤버변수
 
     QSqlTableModel* clientModel;
-    QSqlTableModel* sclientModel;
+    QStandardItemModel* sclientModel;
 };
 
 #endif // CLIENTMANAGERFORM_H

@@ -17,7 +17,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout_3">
      <item>
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="Noticelabel">
        <property name="font">
         <font>
          <pointsize>20</pointsize>
@@ -33,14 +33,27 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>13</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QSplitter" name="Nsplitter">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QWidget" name="">
+         <widget class="QWidget" name="layoutWidget">
           <layout class="QVBoxLayout" name="verticalLayout">
            <item>
-            <widget class="QLabel" name="label_2">
+            <widget class="QLabel" name="clientlabel">
              <property name="text">
               <string>ClientList</string>
              </property>
@@ -61,8 +74,13 @@
               <bool>false</bool>
              </property>
              <property name="headerHidden">
-              <bool>true</bool>
+              <bool>false</bool>
              </property>
+             <column>
+              <property name="text">
+               <string>Port</string>
+              </property>
+             </column>
              <column>
               <property name="text">
                <string>Name</string>
@@ -74,19 +92,6 @@
          </widget>
          <widget class="QTextEdit" name="noticetextEdit"/>
         </widget>
-       </item>
-       <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>13</height>
-          </size>
-         </property>
-        </spacer>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout">

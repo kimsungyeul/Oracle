@@ -1,6 +1,5 @@
 #include "clientmanagerform.h"
 #include "ui_clientmanagerform.h"
-#include "clientitem.h"
 
 #include <QFile>
 #include <QMenu>
@@ -26,6 +25,13 @@ ClientManagerForm::ClientManagerForm(QWidget *parent) :
             this, SLOT(showContextMenu(QPoint)));
     connect(ui->searchLineEdit, SIGNAL(returnPressed()),                        // searchLineEdit의 returnPressed동작시 searchPushButton슬롯 실행
             this, SLOT(on_searchPushButton_clicked()));
+
+    sclientModel = new QStandardItemModel(0,3);
+    sclientModel->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
+    sclientModel->setHeaderData(1, Qt::Horizontal, QObject::tr("Name"));
+    sclientModel->setHeaderData(2, Qt::Horizontal, QObject::tr("PhonNumber"));
+    ui->searchTreeView->setModel(sclientModel);
+    ui->searchTreeView->setRootIsDecorated(false);
 }
 
 void ClientManagerForm::loadData()                                              // 프로그램 실행시 clientlist값을 불러오기 위함
@@ -48,22 +54,8 @@ void ClientManagerForm::loadData()                                              
         clientModel->setHeaderData(2, Qt::Horizontal, tr("Phone Number"));
         clientModel->setHeaderData(3, Qt::Horizontal, tr("Address"));
 
-        sclientModel = new QSqlTableModel(this, db);
-        sclientModel->setTable("clientitem");
-        sclientModel->setHeaderData(0, Qt::Horizontal, QObject::tr("ID"));
-        sclientModel->setHeaderData(1, Qt::Horizontal, QObject::tr("Name"));
-        sclientModel->setHeaderData(2, Qt::Horizontal, QObject::tr("PhonNumber"));
-        sclientModel->setHeaderData(3, Qt::Horizontal, QObject::tr("Address"));
-
         ui->clienttreeView->setModel(clientModel);
-        ui->searchTreeView->setModel(sclientModel);
-
         ui->clienttreeView->setRootIsDecorated(false);
-        ui->searchTreeView->setRootIsDecorated(false);
-
-        //        for(int i=0;i<clientModel->columnCount();i++){
-        //            ui->searchTreeView->resizeColumnToContents(i);
-        //        }
     }
 
     for(int i = 0; i < clientModel->rowCount(); i++) {
@@ -113,51 +105,33 @@ void ClientManagerForm::showContextMenu(const QPoint &pos)                      
 
 void ClientManagerForm::on_searchPushButton_clicked()                           // Search버튼 - Item검색
 {
+    sclientModel->clear();
     int i = ui->searchComboBox->currentIndex();                       // 검색할 id,이름,전화번호, 타입을 설정
-    QString sch = ui->searchLineEdit->text();
-    QSqlDatabase db = QSqlDatabase::database("clientitemConnection");
+    auto flag = (i)? Qt::MatchFixedString|Qt::MatchContains
+                   : Qt::MatchCaseSensitive;
+    QModelIndexList indexes = clientModel->match(clientModel->index(0, i), Qt::EditRole,
+                                                 ui->searchLineEdit->text(),
+                                                 -1, Qt::MatchFlags(flag));
+    foreach(auto idx, indexes) {
+        int id = clientModel->data(idx.siblingAtColumn(0)).toInt();
+        QString name = clientModel->data(idx.siblingAtColumn(1)).toString();
+        QString number = clientModel->data(idx.siblingAtColumn(2)).toString();
+        QStringList strings;
+        strings << QString::number(id) << name << number;
 
-    switch (i) {
-    case 0:
-        sclientModel->QSqlQueryModel::setQuery(QString("select * "
-                                                       "from clientitem "
-                                                       "where c_id = %1").arg(sch),db);
+        QList<QStandardItem *> items;
+        for (int i = 0; i < 3; ++i) {
+            items.append(new QStandardItem(strings.at(i)));
+        }
+
+        sclientModel->appendRow(items);
+        sclientModel->setHeaderData(0, Qt::Horizontal, tr("ID"));
+        sclientModel->setHeaderData(1, Qt::Horizontal, tr("Name"));
+        sclientModel->setHeaderData(2, Qt::Horizontal, tr("Phone Number"));
+        ui->searchTreeView->setModel(sclientModel);
         for(int i=0;i<clientModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
-        break;
-    case 1:
-        sclientModel->QSqlQueryModel::setQuery(QString("select * "
-                                                       "from clientitem "
-                                                       "where c_name "
-                                                       "like '%%1%' "
-                                                       "order by c_id").arg(sch),db);
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    case 2:
-        sclientModel->QSqlQueryModel::setQuery(QString("select * "
-                                                       "from clientitem "
-                                                       "where c_phon "
-                                                       "like '%%1%' "
-                                                       "order by c_id").arg(sch),db);
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    case 3:
-        sclientModel->QSqlQueryModel::setQuery(QString("select * "
-                                                       "from clientitem "
-                                                       "where c_addr "
-                                                       "like '%%1%' "
-                                                       "order by c_id").arg(sch),db);
-        for(int i=0;i<clientModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    default:
-        break;
     }
 }
 
@@ -176,10 +150,6 @@ void ClientManagerForm::on_modifyPushButton_clicked()                           
         clientModel->setData(model.siblingAtColumn(2), number);
         clientModel->setData(model.siblingAtColumn(3), address);
         clientModel->submit();
-
-        //        for(int i=0;i<clientModel->columnCount();i++){
-        //            ui->clienttreeView->resizeColumnToContents(i);
-        //        }
     }
 }
 

@@ -1,8 +1,6 @@
 #ifndef ORDERMANAGERFORM_H
 #define ORDERMANAGERFORM_H
 
-#include "clientitem.h"
-#include "productitem.h"
 #include <QWidget>
 #include <QHash>
 #include <QSqlQueryModel>
@@ -11,9 +9,6 @@
 #include <QSqlError>
 #include <QSqlTableModel>
 
-#include "orderitem.h"
-
-class OrderItem;
 class QMenu;
 class QTreeWidgetItem;
 class ClientManagerForm;
@@ -83,7 +78,6 @@ signals:
 private:
     int makeOId();
 
-    QMap<int, OrderItem*> orderList;
     Ui::OrderManagerForm *ui;
     QMenu* menu;
 

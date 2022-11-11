@@ -56,6 +56,8 @@ public slots:
     //void privateChatSend(quint16,QString);
     void privateChatSend(QString,QString);
 
+    void noticeChatSend(QString,QString);
+
 private slots:
     void on_clientTreeWidget_customContextMenuRequested(const QPoint &pos);
     void on_chatTreeWidget_customContextMenuRequested(const QPoint &pos);
@@ -68,6 +70,7 @@ private:
 
     Ui::ChatServer *ui;
     QTcpServer *chatServer;
+    ChatNoticeDetails* notice;
 
     QList<QTcpSocket*> clientList;
     QList<int> clientIDList;

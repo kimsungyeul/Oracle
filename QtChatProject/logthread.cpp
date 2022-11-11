@@ -13,7 +13,7 @@ void LogThread::run()                                               // Thread �
 {
     Q_FOREVER {                                                     // 프로그램종료까지 반복
         if(itemList.count() > 0) {                                  // itemList가 하나로 있다면
-            QFile file("log.txt");                                  // log.txt파일명 생성
+            QFile file("serverlog.txt");                                  // log.txt파일명 생성
             if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) // 파일을 열수없다면 리턴
                 return;
 

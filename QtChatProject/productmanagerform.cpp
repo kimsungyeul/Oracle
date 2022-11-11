@@ -1,5 +1,4 @@
 #include "productmanagerform.h"
-#include "productitem.h"
 #include "ui_productmanagerform.h"
 
 #include <QFile>
@@ -25,6 +24,14 @@ ProductManagerForm::ProductManagerForm(QWidget *parent) :
             this, SLOT(showContextMenu(QPoint)));
     connect(ui->searchLineEdit, SIGNAL(returnPressed()),
             this, SLOT(on_searchPushButton_clicked()));
+
+    sproductModel = new QStandardItemModel(0,4);
+    sproductModel->setHeaderData(0, Qt::Horizontal, QObject::tr("PID"));
+    sproductModel->setHeaderData(1, Qt::Horizontal, QObject::tr("PName"));
+    sproductModel->setHeaderData(2, Qt::Horizontal, QObject::tr("Price"));
+    sproductModel->setHeaderData(3, Qt::Horizontal, QObject::tr("Stock"));
+    ui->searchTreeView->setModel(sproductModel);
+    ui->searchTreeView->setRootIsDecorated(false);
 }
 
 void ProductManagerForm::loadData()
@@ -47,30 +54,9 @@ void ProductManagerForm::loadData()
         productModel->setHeaderData(2, Qt::Horizontal, tr("Price"));
         productModel->setHeaderData(3, Qt::Horizontal, tr("Stock"));
 
-        sproductModel = new QSqlTableModel(this, db);
-        sproductModel->setTable("productitem");
-        sproductModel->setHeaderData(0, Qt::Horizontal, QObject::tr("PID"));
-        sproductModel->setHeaderData(1, Qt::Horizontal, QObject::tr("PName"));
-        sproductModel->setHeaderData(2, Qt::Horizontal, QObject::tr("Price"));
-        sproductModel->setHeaderData(3, Qt::Horizontal, QObject::tr("Stock"));
-
         ui->producttreeView->setModel(productModel);
-        ui->searchTreeView->setModel(sproductModel);
-
         ui->producttreeView->setRootIsDecorated(false);
-        ui->searchTreeView->setRootIsDecorated(false);
-
-        //        for(int i=0;i<productModel->columnCount();i++){
-        //            //ui->producttreeView->resizeColumnToContents(i);
-        //            ui->searchTreeView->resizeColumnToContents(i);
-        //        }
     }
-
-    //    for(int i = 0; i < productModel->rowCount(); i++) {
-    //        int id = productModel->data(productModel->index(i, 0)).toInt();
-    //        QString name = productModel->data(productModel->index(i, 1)).toString();
-    //        emit productAdded(id, name);
-    //    }
 }
 
 ProductManagerForm::~ProductManagerForm()
@@ -99,7 +85,6 @@ void ProductManagerForm::removeItem()
     QModelIndex model = ui->producttreeView->currentIndex();                     // 선택된 항목을 저장
     QSqlDatabase db = QSqlDatabase::database("productitemConnection");
     if(db.isOpen() && model.isValid()) {
-        //clientList.remove(clientModel->data(index.siblingAtColumn(0)).toInt());
         productModel->removeRow(model.row());
         productModel->select();
         for(int i=0;i<productModel->columnCount();i++){
@@ -117,37 +102,36 @@ void ProductManagerForm::showContextMenu(const QPoint &pos)
 
 void ProductManagerForm::on_searchPushButton_clicked()
 {
+    sproductModel->clear();
     int i = ui->searchComboBox->currentIndex();                       // 검색할 id,이름,전화번호, 타입을 설정
-    QString sch = ui->searchLineEdit->text();
-    QSqlDatabase db = QSqlDatabase::database("productitemConnection");
+    auto flag = (i)? Qt::MatchFixedString|Qt::MatchContains
+                   : Qt::MatchCaseSensitive;
+    QModelIndexList indexes = productModel->match(productModel->index(0, i), Qt::EditRole,
+                                                  ui->searchLineEdit->text(),
+                                                  -1, Qt::MatchFlags(flag));
 
-    switch (i) {
-    case 0:
-        sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_id = %1").arg(sch),db);
+    foreach(auto idx, indexes) {
+        int pid = productModel->data(idx.siblingAtColumn(0)).toInt(); //c->id();
+        QString pname = productModel->data(idx.siblingAtColumn(1)).toString();
+        int price = productModel->data(idx.siblingAtColumn(2)).toInt();
+        int stock = productModel->data(idx.siblingAtColumn(3)).toInt();
+        QStringList strings;
+        strings << QString::number(pid) << pname << QString::number(price) << QString::number(stock);
+
+        QList<QStandardItem *> items;
+        for (int i = 0; i < 4; ++i) {
+            items.append(new QStandardItem(strings.at(i)));
+        }
+
+        sproductModel->appendRow(items);
+        sproductModel->setHeaderData(0, Qt::Horizontal, tr("PID"));
+        sproductModel->setHeaderData(1, Qt::Horizontal, tr("PName"));
+        sproductModel->setHeaderData(2, Qt::Horizontal, tr("Price"));
+        sproductModel->setHeaderData(3, Qt::Horizontal, tr("Stock"));
+        ui->searchTreeView->setModel(sproductModel);
         for(int i=0;i<sproductModel->columnCount();i++){
             ui->searchTreeView->resizeColumnToContents(i);
         }
-        break;
-    case 1:
-        sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_name like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<sproductModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    case 2:
-        sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_price like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<sproductModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    case 3:
-        sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_stock like '%%1%' order by p_id").arg(sch),db);
-        for(int i=0;i<sproductModel->columnCount();i++){
-            ui->searchTreeView->resizeColumnToContents(i);
-        }
-        break;
-    default:
-        break;
     }
 }
 
@@ -166,10 +150,6 @@ void ProductManagerForm::on_modifyPushButton_clicked()
         productModel->setData(model.siblingAtColumn(2), price);
         productModel->setData(model.siblingAtColumn(3), stock);
         productModel->submit();
-
-        //        for(int i=0;i<productModel->columnCount();i++){
-        //            ui->producttreeView->resizeColumnToContents(i);
-        //        }
     }
 }
 
@@ -191,10 +171,6 @@ void ProductManagerForm::on_addPushButton_clicked()
         query.bindValue(3, stock);
         query.exec();
         productModel->select();
-        //        for(int i=0;i<productModel->columnCount();i++){
-        //            ui->producttreeView->resizeColumnToContents(i);
-        //        }
-        //emit clientAdded(id, name);
     }
 }
 
@@ -205,7 +181,6 @@ void ProductManagerForm::on_deletePushButton_clicked()
 
 void ProductManagerForm::productIdListData(int index)
 {
-    //ui->searchTreeWidget->clear();
     QString PIdstr;
     QList<QString> PIdList;
 
@@ -221,11 +196,6 @@ void ProductManagerForm::productIdListData(int index)
 
 void ProductManagerForm::productNameListData(QString pname)
 {
-    //ui->searchTreeWidget->clear();
-
-    //auto items = ui->producttreeWidget->findItems(pname,Qt::MatchCaseSensitive
-    //                                              |Qt::MatchContains,1);
-
     QSqlDatabase db = QSqlDatabase::database("productitemConnection");
     QSqlTableModel query(this,db);
     query.QSqlQueryModel::setQuery(QString("select * "

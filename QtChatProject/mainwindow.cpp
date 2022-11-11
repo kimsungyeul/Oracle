@@ -5,6 +5,7 @@
 #include "productmanagerform.h"
 #include "ordermanagerform.h"
 #include "chatserver.h"
+#include "chatnoticedetails.h"
 
 MainWindow::MainWindow(QWidget *parent)                                 // MainWindow 생성자
     : QMainWindow(parent)
@@ -74,6 +75,7 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 
     connect(clientForm, SIGNAL(clientAdded(int, QString)),              //ClientManager에서 리스트를 읽어올때 ChatServerForm의 ClientWidget에도 출력되기 위한 connect
             chatserverForm, SLOT(addClient(int, QString)));
+
 
     clientForm->loadData();                                             // ClientManagerForm실행시 clientList데이터 불러오기용 멤버함수
     productForm->loadData();                                            // ProductManagerForm실행시 productList데이터 불러오기용 멤버함수
