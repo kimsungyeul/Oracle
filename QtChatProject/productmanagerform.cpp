@@ -48,8 +48,7 @@ void ProductManagerForm::loadData()
         productModel->setHeaderData(3, Qt::Horizontal, tr("Stock"));
 
         sproductModel = new QSqlTableModel(this, db);
-        sproductModel->QSqlQueryModel::setQuery(QString("select * from productitem where p_id = 0"),db);
-        sproductModel->select();
+        sproductModel->setTable("productitem");
         sproductModel->setHeaderData(0, Qt::Horizontal, QObject::tr("PID"));
         sproductModel->setHeaderData(1, Qt::Horizontal, QObject::tr("PName"));
         sproductModel->setHeaderData(2, Qt::Horizontal, QObject::tr("Price"));
@@ -158,15 +157,10 @@ void ProductManagerForm::on_modifyPushButton_clicked()
     QSqlDatabase db = QSqlDatabase::database("productitemConnection");
     if(db.isOpen()){
         int key = model.sibling(model.row(),0).data().toInt();                                        // 0번째항목에서 key값추출
-        //ClientItem* c = clientList[key];                                        // clientList에 key값을 이용해 아이템 추출
         QString pname, price, stock;                                          // 이름,전화번호,주소 QString형 변수 생성
         pname = ui->pnameLineEdit->text();                                        // nameLineEdit의 text를 name변수에 저장
         price = ui->priceLineEdit->text();                               // phoneNumberLineEdit의 text를 number변수에 저장
         stock = ui->stockLineEdit->text();                                  // addressLineEdit의 text를 address변수에 저장
-        /*c->setName(name);                                                       // item에 name멤버변수저장
-            c->setPhoneNumber(number);                                              // item에 number멤버변수저장
-            c->setAddress(address);                                                 // item에 address멤버변수저장
-            clientList[key] = c;*/                                                    // clientList의 key값에 item인 c 저장
 
         productModel->setData(model.siblingAtColumn(1), pname);
         productModel->setData(model.siblingAtColumn(2), price);
@@ -233,40 +227,39 @@ void ProductManagerForm::productNameListData(QString pname)
     //                                              |Qt::MatchContains,1);
 
     QSqlDatabase db = QSqlDatabase::database("productitemConnection");
-    sproductModel->QSqlQueryModel::setQuery(QString("select * "
-                                                    "from productitem "
-                                                    "where p_name "
-                                                    "like '%%1%' "
-                                                    "order by p_id").arg(pname),db);
-    for(int i = 0; i < sproductModel->rowCount(); i++) {
-        int pid = sproductModel->data(productModel->index(i, 0)).toInt();
-        QString pname = sproductModel->data(productModel->index(i, 1)).toString();
-        int price = sproductModel->data(productModel->index(i, 2)).toInt();
-        int stock = sproductModel->data(productModel->index(i, 3)).toInt();
+    QSqlTableModel query(this,db);
+    query.QSqlQueryModel::setQuery(QString("select * "
+                                           "from productitem "
+                                           "where p_name "
+                                           "like '%%1%' "
+                                           "order by p_id").arg(pname),db);
+    for(int i = 0; i < query.rowCount(); i++) {
+        int pid = query.data(productModel->index(i, 0)).toInt();
+        QString pname = query.data(productModel->index(i, 1)).toString();
+        int price = query.data(productModel->index(i, 2)).toInt();
+        int stock = query.data(productModel->index(i, 3)).toInt();
         emit productFindDataSent(pid,pname,price,stock);
     }
-    //    foreach(auto i, items) {
-    //        ProductItem* p = static_cast<ProductItem*>(i);
-    //        int pid = p->pid();
-    //        QString pname = p->getPName();
-    //        int price = p->getPrice();
-    //        int stock = p->getStock();
-    //        ProductItem* item = new ProductItem(pid, pname, price, stock);
-    //        emit productFindDataSent(item);
-    //    }
 }
 
 void ProductManagerForm::productItemRecv(int pid)
 {
-    //    ProductItem* productData = productList[pid];
+    QSqlDatabase db = QSqlDatabase::database("productitemConnection");
+    QSqlTableModel query(this,db);
+    query.QSqlQueryModel::setQuery(QString("select * "
+                                           "from productitem "
+                                           "where p_id = '%1'").arg(pid),db);
+    QString pname = query.data(query.index(0, 1)).toString();
+    QString price = query.data(query.index(0, 2)).toString();
+    QString stock = query.data(query.index(0, 3)).toString();
 
-    //    emit productIdDataSent(productData);
+    emit productIdDataSent(pid,pname,price,stock);
 }
 
 void ProductManagerForm::productStockUp(int pid,int amount)
 {
     QSqlDatabase db = QSqlDatabase::database("productitemConnection");
-    QSqlTableModel query(nullptr,db);
+    QSqlTableModel query(this,db);
     query.QSqlQueryModel::setQuery(QString("select * "
                                            "from productitem "
                                            "where p_id = '%1'").arg(pid),db);

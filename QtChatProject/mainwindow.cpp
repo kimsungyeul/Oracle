@@ -63,8 +63,8 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
 
     connect(orderForm, SIGNAL(getProductItemSent(int)),                 // 선택된 ProductItem의 Product Id를 뽑아 ProductManager에서 검색
             productForm, SLOT(productItemRecv(int)));
-    connect(productForm, SIGNAL(productIdDataSent(ProductItem*)),       // ProductManagerForm에서 선택된 Item을 OrderManager에 전달해 Stock,Price,Amount 최신화
-            orderForm, SLOT(getProductIdDataRecv(ProductItem*)));
+    connect(productForm, SIGNAL(productIdDataSent(int,QString,QString,QString)),       // ProductManagerForm에서 선택된 Item을 OrderManager에 전달해 Stock,Price,Amount 최신화
+            orderForm, SLOT(getProductIdDataRecv(int,QString,QString,QString)));
 
     connect(orderForm, SIGNAL(stockUpdate(int,int)),                    // OrderManagerForm의 Stock Update 시그널시 ProductManagerForm의 Stock Update용 connect
             productForm, SLOT(productStockUp(int,int)));

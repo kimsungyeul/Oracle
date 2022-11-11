@@ -53,7 +53,7 @@ signals:
     void productAdded(QString);
     void productDataListSent(QList<QString>);
     void productFindDataSent(int,QString,int,int);
-    void productIdDataSent(ProductItem*);
+    void productIdDataSent(int,QString,QString,QString);
 
     void udstockSend(int);
 

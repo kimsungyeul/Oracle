@@ -39,7 +39,7 @@ public slots:
 
     void productDataListRecv(QList<QString>);
     void productFindDataRecv(int,QString,int,int);
-    void getProductIdDataRecv(ProductItem*);
+    void getProductIdDataRecv(int,QString,QString,QString);
 
     void udstockRecv(int);
 
@@ -63,11 +63,11 @@ private slots:
 
     void on_amountspinBox_valueChanged(int arg1);
 
-    void on_ordertreeWidget_itemClicked(QTreeWidgetItem *item, int column);
-
     void on_deletepushButton_clicked();
 
     void on_modifypushButton_clicked();
+
+    void on_ordertreeView_clicked(const QModelIndex &index);
 
 signals:
     void orderAdded(QString);

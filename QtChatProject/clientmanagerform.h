@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlTableModel>
+#include <QStandardItemModel>
 
 #include "clientitem.h"
 

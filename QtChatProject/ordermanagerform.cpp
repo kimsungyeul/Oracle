@@ -28,42 +28,6 @@ OrderManagerForm::OrderManagerForm(QWidget *parent) :
 
 void OrderManagerForm::loadData()
 {
-//    QFile file("orderlist.txt");
-//    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-//        return;
-
-//    QTextStream in(&file);
-//    while (!in.atEnd()) {
-//        QString line = in.readLine();
-//        QList<QString> row = line.split(",");
-//        if(row.size()) {
-//            int oid = row[0].toInt();
-//            int cid = row[1].toInt();
-//            QString cname = row[2];
-//            int pid = row[3].toInt();
-//            QString pname = row[4];
-//            int amount = row[5].toInt();
-//            int totprice = row[6].toInt();
-//            QString date = row[7];
-
-//            OrderItem* o = new OrderItem(oid, cid, cname, pid, pname, amount, totprice, date);
-//            //ui->ordertreeWidget->addTopLevelItem(o);
-//            orderList.insert(oid, o);
-
-//            QTreeWidgetItem* orderitem = new QTreeWidgetItem(ui->ordertreeWidget);
-//            QString CNameIdstr, PNameIdstr;
-//            CNameIdstr = QString("%1(%2)").arg(cname).arg(cid);
-//            PNameIdstr = QString("%1(%2)").arg(pname).arg(pid);
-
-//            orderitem->setText(0,QString::number(oid));
-//            orderitem->setText(1, CNameIdstr);
-//            orderitem->setText(2, PNameIdstr);
-//            orderitem->setText(3,QString::number(amount));
-//            orderitem->setText(4,QString::number(totprice));
-//            orderitem->setText(5,date);
-//        }
-//    }
-//    file.close( );
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "orderitemConnection");
     db.setDatabaseName("orderitem.db");
     if (db.open()) {
@@ -102,22 +66,6 @@ void OrderManagerForm::loadData()
 
 OrderManagerForm::~OrderManagerForm()
 {
-//    delete ui;
-
-//    QFile file("orderlist.txt");
-//    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-//        return;
-
-//    QTextStream out(&file);
-//    for (const auto& v : orderList) {
-//        OrderItem* o = v;
-//        out << o->oid() << "," << o->getcid() << "," ;
-//        out << o->getcname() << "," << o->getpid() << ",";
-//        out << o->getpname() << "," << o-> getAmount()<< ",";
-//        out << o->getTotPrice() << ",";
-//        out << o->getDate() << "\n";
-//    }
-//    file.close( );
     delete ui;
     QSqlDatabase db = QSqlDatabase::database("orderitemConnection");
     if(db.isOpen()) {
@@ -331,6 +279,7 @@ void OrderManagerForm::on_addpushButton_clicked()
             for(int i=0;i<orderModel->columnCount();i++){
                 ui->ordertreeView->resizeColumnToContents(i);
             }
+
             emit stockUpdate(pid,amount);
         }
     } else {
@@ -345,33 +294,28 @@ void OrderManagerForm::on_amountspinBox_valueChanged(int arg1)
     ui->totalpriceLineEdit->setText(QString::number(arg1 * ui->priceLineEdit->text().toInt()));
 }
 
-void OrderManagerForm::getProductIdDataRecv(ProductItem* item)
+void OrderManagerForm::getProductIdDataRecv(int pid, QString pname, QString price ,QString stock)
 {
-//    ui->producttreeWidget->clear();
+    ui->producttreeWidget->clear();
 
-//    //ui->producttreeWidget->addTopLevelItem(item);
-//    QString maxstock = item->text(3);
-//    ui->priceLineEdit->setText(item->text(2));
-//    ui->amountspinBox->setMaximum(maxstock.toInt());
-//    ui->stockLineEdit->setText(maxstock);
+    QTreeWidgetItem *item = new QTreeWidgetItem(ui->producttreeWidget);
+    if(pid != NULL) {
+        item->setText(0,QString::number(pid));
+        item->setText(1,pname);
+        item->setText(2,price);
+        item->setText(3,stock);
+    }
+    ui->producttreeWidget->addTopLevelItem(item);
+
+    //    for(int i = 0; i < ui->clienttreeWidget->columnCount(); i++){
+    //        ui->clienttreeWidget->resizeColumnToContents(i);
+    //    }
+
+    QString maxstock = item->text(3);
+    ui->priceLineEdit->setText(item->text(2));
+    ui->amountspinBox->setMaximum(maxstock.toInt());
+    ui->stockLineEdit->setText(maxstock);
 }
-
-void OrderManagerForm::on_ordertreeWidget_itemClicked(QTreeWidgetItem *item, int column)
-{
-//    Q_UNUSED(column);
-
-//    QList<QString> clientrow = item->text(1).split("(");
-//    QList<QString> productrow = item->text(2).split("(");
-//    int clientID = clientrow[1].remove(QChar(')'), Qt::CaseInsensitive).toInt();
-//    int productID = productrow[1].remove(QChar(')'), Qt::CaseInsensitive).toInt();
-
-//    emit getProductItemSent(productID);
-
-//    ui->nameLineEdit->setText(item->text(1));
-//    ui->pnameLineEdit->setText(item->text(2));
-//    ui->totalpriceLineEdit->setText(item->text(4));
-}
-
 
 void OrderManagerForm::on_deletepushButton_clicked()
 {
@@ -381,31 +325,27 @@ void OrderManagerForm::on_deletepushButton_clicked()
 
 void OrderManagerForm::on_modifypushButton_clicked()
 {
-//    QTreeWidgetItem* item = ui->ordertreeWidget->currentItem();
-//    if(item != nullptr) {
-//        int key = item->text(0).toInt();
-//        OrderItem* o = orderList[key];
+    QModelIndex model = ui->ordertreeView->currentIndex();
 
-//        int befamount, afamount, totalPrice;
-//        QString cname,pname;
-// //유나코드 해야함
-////        cid = clientIDList[ui->clientComboBox->currentIndex()];
-////        pid = productIDList[ui->productComboBox->currentIndex()];
-//        QList<QString> productrow = ui->pnameLineEdit->text().split("(");
-//        productrow[1] = productrow[1].remove(QChar(')'), Qt::CaseInsensitive);
-//        int pid = productrow[1].toInt();
+    if(model.isValid() != NULL) {
+        int befamount, afamount, totalPrice;
+        QString cname,pname;
 
-//        befamount = item->text(3).toInt();
-//        afamount = ui->amountspinBox->value();
-//        totalPrice = ui->totalpriceLineEdit->text().toInt();
+        int pid = model.sibling(model.row(),3).data().toInt();;
 
-//        item->setText(3,QString::number(afamount));
-//        item->setText(4,QString::number(totalPrice));
-//        o->setAmount(afamount);
-//        o->setTotPrice(totalPrice);
-//        orderList[key] = o;
-//        emit stockUpdate(pid,afamount-befamount);
-//    }
+        befamount = model.sibling(model.row(),5).data().toInt();;
+        afamount = ui->amountspinBox->value();
+        totalPrice = ui->totalpriceLineEdit->text().toInt();
+
+        QSqlDatabase db = QSqlDatabase::database("orderitemConnection");
+        if(db.isOpen()){
+            orderModel->setData(model.siblingAtColumn(5), afamount);
+            orderModel->setData(model.siblingAtColumn(6), totalPrice);
+            orderModel->submit();
+        }
+
+        emit stockUpdate(pid,afamount-befamount);
+    }
 }
 
 void OrderManagerForm::udstockRecv(int stock)
@@ -416,3 +356,16 @@ void OrderManagerForm::udstockRecv(int stock)
         ui->producttreeWidget->update();
     }
 }
+
+void OrderManagerForm::on_ordertreeView_clicked(const QModelIndex &index)
+{
+    int clientID = index.sibling(index.row(),1).data().toInt();
+    int productID = index.sibling(index.row(),3).data().toInt();
+
+    emit getProductItemSent(productID);
+
+    ui->nameLineEdit->setText(index.sibling(index.row(),2).data().toString());
+    ui->pnameLineEdit->setText(index.sibling(index.row(),4).data().toString());
+    ui->totalpriceLineEdit->setText(index.sibling(index.row(),6).data().toString());
+}
+
