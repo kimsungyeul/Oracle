@@ -10,18 +10,16 @@ ChatNoticeDetails::ChatNoticeDetails(QWidget *parent) :
     sizes << 300 << 600;
     ui->Nsplitter->setSizes(sizes);
 
-    connect(ui->quitpushButton, SIGNAL(clicked()), SLOT(close));
+    connect(ui->quitpushButton, SIGNAL(clicked()), SLOT(close()));
 }
 
 ChatNoticeDetails::~ChatNoticeDetails()
 {
-    qDebug() << "close";
     delete ui;
 }
 
 void ChatNoticeDetails::closeEvent(QCloseEvent*)
 {
-    qDebug() << "close";
     emit closeNotice();
 }
 
@@ -37,3 +35,17 @@ void ChatNoticeDetails::setClientList(QHash<quint16, QString> clientNameHash)
     ui->clientTreeWidget->addTopLevelItems(chatList);
     ui->clientTreeWidget->resizeColumnToContents(0);
 }
+
+void ChatNoticeDetails::on_sendpushButton_clicked()
+{
+    QString str = ui->noticelineEdit->text();
+    if(str.length()){
+        QByteArray bytearray;
+        //bytearray.clear();
+        bytearray = str.toUtf8( );
+        /* 화면에 표시 : 앞에 '공지사항'라고 추가 */
+        ui->noticetextEdit->append("<font color=red>공지사항</font> : " + str);
+    }
+    emit sendNoticeData(str);
+}
+

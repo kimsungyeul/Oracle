@@ -76,6 +76,8 @@ MainWindow::MainWindow(QWidget *parent)                                 // MainW
     connect(clientForm, SIGNAL(clientAdded(int, QString)),              //ClientManager에서 리스트를 읽어올때 ChatServerForm의 ClientWidget에도 출력되기 위한 connect
             chatserverForm, SLOT(addClient(int, QString)));
 
+    notice = new ChatNoticeDetails;
+    connect(notice, SIGNAL(closeNotice()), chatserverForm,SLOT(bttig()));
 
     clientForm->loadData();                                             // ClientManagerForm실행시 clientList데이터 불러오기용 멤버함수
     productForm->loadData();                                            // ProductManagerForm실행시 productList데이터 불러오기용 멤버함수

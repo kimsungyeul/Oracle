@@ -23,6 +23,10 @@ protected:
 
 signals:
     void closeNotice();
+    void sendNoticeData(QString);
+
+private slots:
+    void on_sendpushButton_clicked();
 
 private:
     Ui::ChatNoticeDetails *ui;

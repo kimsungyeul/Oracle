@@ -78,9 +78,7 @@ ChatServer::ChatServer(QWidget *parent) :
     logThread = new LogThread(this);
     logThread->start();
 
-    notice = new ChatNoticeDetails;
-    connect(notice, SIGNAL(closeNotice()), SLOT([this](){ qDebug("1"); }));
-    //notice = new ChatNoticeDetails;
+    connect(ui->savePushButton, SIGNAL(clicked()), logThread, SLOT(saveData()));
 
     qDebug() << tr("The server is running on port %1.").arg(chatServer->serverPort());
 }
@@ -408,7 +406,7 @@ void ChatServer::readClient()
 {
     qDebug("Receiving file ...");
     QTcpSocket* receivedSocket = dynamic_cast<QTcpSocket *>(sender( ));
-    QString filename;
+    QString filename, name;
 
     if (byteReceived == 0) { // just started to receive data, this data is file information
         progressDialog->reset();
@@ -416,12 +414,17 @@ void ChatServer::readClient()
 
         QString ip = receivedSocket->peerAddress().toString();
         quint16 port = receivedSocket->peerPort();
+        qDebug() << ip << " : " << port;
+
+        QDataStream in(receivedSocket);
+        in >> totalSize >> byteReceived >> filename >> name;
+        progressDialog->setMaximum(totalSize);
 
         QTreeWidgetItem* item = new QTreeWidgetItem(ui->messageTreeWidget);
         item->setText(0, ip);
         item->setText(1, QString::number(port));
-        item->setText(2, QString::number(clientIDHash[clientNameHash[port]]));
-        item->setText(3, clientNameHash[port]);
+        item->setText(2, QString::number(clientIDHash[name]));
+        item->setText(3, name);
         item->setText(4, filename);
         item->setText(5, QDateTime::currentDateTime().toString());
         item->setToolTip(4, filename);
@@ -430,12 +433,7 @@ void ChatServer::readClient()
             ui->messageTreeWidget->resizeColumnToContents(i);
 
         ui->messageTreeWidget->addTopLevelItem(item);
-
         logThread->appendData(item);
-
-        QDataStream in(receivedSocket);
-        in >> totalSize >> byteReceived >> filename;
-        progressDialog->setMaximum(totalSize);
 
         QFileInfo info(filename);
         QString currentFileName = info.fileName();
@@ -520,29 +518,29 @@ void ChatServer::on_noticepushButton_clicked()
     notice = new ChatNoticeDetails;
     notice->setClientList(clientNameHash);
 
-    connect(notice, SIGNAL(sendData(QString,QString)), SLOT(noticeChatSend(QString,QString)));
-    //connect(notice, SIGNAL(closeNotice()), [](){ qDebug("1"); });
+    connect(notice, SIGNAL(sendNoticeData(QString)), SLOT(noticeChatSend(QString)));
+    connect(notice, &ChatNoticeDetails::closeNotice, this, [this](){ ui->noticepushButton->setEnabled(true); });
     notice->setWindowTitle("Notice Chat");
     notice->show();
 }
 
-void ChatServer::noticeChatSend(QString name, QString str)
+void ChatServer::noticeChatSend(QString str)
 {
-    QTcpSocket* sock = clientSocketHash[name];
-    quint16 port = sock->peerPort();
-    QByteArray sendArray;
-    sendArray.clear();
-    QDataStream out(&sendArray, QIODevice::WriteOnly);
-    out << Chat_Notice;
-    sendArray.append("<font color=green>");
-    sendArray.append("***Notice***");
-    sendArray.append("</font> : ");
-    sendArray.append(str.toStdString().data());
-    sock->write(sendArray);
-
-
+    foreach (auto name, clientNameHash) {
+        QTcpSocket* sock = clientSocketHash[name];
+        quint16 port = sock->peerPort();
+        QByteArray sendArray;
+        sendArray.clear();
+        QDataStream out(&sendArray, QIODevice::WriteOnly);
+        out << Chat_Notice;
+        sendArray.append("<font color=green>");
+        sendArray.append("***Notice***");
+        sendArray.append("</font> : ");
+        sendArray.append(str.toStdString().data());
+        sock->write(sendArray);
+    }
     QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);
-    logitem->setText(1, QString::number(port));
+    logitem->setText(1, "Notice");
     logitem->setText(2, "Notice");
     logitem->setText(3, "Admin");
     logitem->setText(4, str);

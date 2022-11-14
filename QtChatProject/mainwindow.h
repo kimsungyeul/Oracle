@@ -17,6 +17,7 @@ class ClientManagerForm;                    // ClientManagerForm클래스 참조
 class ProductManagerForm;                   // ProductManagerForm클래스 참조
 class OrderManagerForm;                     // OrderManagerForm클래스 참조
 class ChatServer;                           // ChatServer클래스 참조
+class ChatNoticeDetails;
 
 class MainWindow : public QMainWindow
 {
@@ -41,5 +42,6 @@ private:
     ProductManagerForm *productForm;        // ProductManagerForm 객체 생성
     OrderManagerForm *orderForm;            // OrderManagerForm 객체 생성
     ChatServer *chatserverForm;             // ChatServer 객체 생성
+    ChatNoticeDetails *notice;
 };
 #endif // MAINWINDOW_H

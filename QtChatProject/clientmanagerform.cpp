@@ -140,7 +140,6 @@ void ClientManagerForm::on_modifyPushButton_clicked()                           
     QModelIndex model = ui->clienttreeView->currentIndex();
     QSqlDatabase db = QSqlDatabase::database("clientitemConnection");
     if(db.isOpen()){
-        int key = model.sibling(model.row(),0).data().toInt();                                        // 0번째항목에서 key값추출
         QString name, number, address;                                          // 이름,전화번호,주소 QString형 변수 생성
         name = ui->nameLineEdit->text();                                        // nameLineEdit의 text를 name변수에 저장
         number = ui->phoneNumberLineEdit->text();                               // phoneNumberLineEdit의 text를 number변수에 저장
@@ -185,6 +184,7 @@ void ClientManagerForm::on_deletePushButton_clicked()                           
 
 void ClientManagerForm::clientIdListData(int index)                             // ClientComoboBox의 Index에 따른 ClientList를 가져오기 위함
 {
+    Q_UNUSED(index);
     QString Idstr;                                                              // Id와 이름을 QString형으로 같이 저장하기위한 변수
     QList<QString> IdList;                                                      // Idstr인 QString을 저장하기위한 QList 변수
 
