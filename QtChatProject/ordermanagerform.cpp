@@ -76,7 +76,7 @@ OrderManagerForm::~OrderManagerForm()
 int OrderManagerForm::makeOId( )
 {
     if(orderModel->rowCount() == 0) {                                               // clientList의 데이터가 없다면
-        return 5000;                                                            // id를 1000번부터 부여
+        return 5000;                                                            // id를 5000번부터 부여
     } else {
         int lastNum = orderModel->rowCount();
         auto oid = orderModel->data(orderModel->index(lastNum-1, 0)).toInt();             // clientList의 마지막값을 id로 가져와

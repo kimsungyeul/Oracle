@@ -42,6 +42,5 @@ private:
     ProductManagerForm *productForm;        // ProductManagerForm 객체 생성
     OrderManagerForm *orderForm;            // OrderManagerForm 객체 생성
     ChatServer *chatserverForm;             // ChatServer 객체 생성
-    ChatNoticeDetails *notice;
 };
 #endif // MAINWINDOW_H
