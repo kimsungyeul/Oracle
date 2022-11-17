@@ -40,7 +40,7 @@ void ProductManagerForm::loadData()
     db.setDatabaseName("productitem.db");                                           // productitem.db를 db이름으로 설정
     if (db.open()) {                                                                // db가 열리면
         QSqlQuery query(db);                                                        // query사용타켓을 db로 설정
-        query.exec("CREATE TABLE IF NOT EXISTS productitem("                        // query문으로 table생성
+        query.exec("CREATE TABLE IF NOT EXISTS productitem("
                    "p_id INTEGER Primary Key, "
                    "p_name VARCHAR(30) NOT NULL, "
                    "p_price INTEGER, "

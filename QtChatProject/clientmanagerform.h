@@ -11,7 +11,7 @@
 #include <QStandardItemModel>
 
 class QMenu;                                                                    // QMenu클래스 참조
-class QTreeWidgetItem;                                                          // QTreeWidgetItem
+class QTreeWidgetItem;                                                          // QTreeWidgetItem클래스 참조
 
 namespace Ui {
 class ClientManagerForm;

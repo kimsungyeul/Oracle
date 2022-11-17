@@ -23,7 +23,7 @@ signals:
 
 public slots:
     void appendData(QTreeWidgetItem*);              // server의 로그기록을 저장하기위한 슬롯
-    void saveData();
+    void saveData();                                // 현재 itemList에 저장된값을 파일로그로 저장하기위한 함수
 };
 
 #endif // LOGTHREAD_H

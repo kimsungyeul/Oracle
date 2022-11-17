@@ -21,7 +21,7 @@ ClientManagerForm::ClientManagerForm(QWidget *parent) :
     menu = new QMenu;                                                           // Action을 동작하기위한 메뉴생성 멤버변수
     menu->addAction(removeAction);                                              // 액션 추가
     ui->clienttreeView->setContextMenuPolicy(Qt::CustomContextMenu);            // 위젯의 ContextMenu의 속성을 표시하기 위함
-    connect(ui->clienttreeView, SIGNAL(customContextMenuRequested(QPoint)),     // clienttreeWidget내부에서 우클릭동작시 ContextMenu를 실행하기 위함
+    connect(ui->clienttreeView, SIGNAL(customContextMenuRequested(QPoint)),     // clienttreeView내부에서 우클릭동작시 ContextMenu를 실행하기 위함
             this, SLOT(showContextMenu(QPoint)));
     connect(ui->searchLineEdit, SIGNAL(returnPressed()),                        // searchLineEdit의 returnPressed동작시 searchPushButton슬롯 실행
             this, SLOT(on_searchPushButton_clicked()));
@@ -40,7 +40,7 @@ void ClientManagerForm::loadData()                                              
     db.setDatabaseName("clientitem.db");                                        // clientitem.db를 db이름으로 설정
     if (db.open()) {                                                            // db가 열리면
         QSqlQuery query(db);                                                    // query사용타켓을 db로 설정
-        query.exec("CREATE TABLE IF NOT EXISTS clientitem("                     // query문으로 table생성
+        query.exec("CREATE TABLE IF NOT EXISTS clientitem("
                    "c_id INTEGER Primary Key, "
                    "c_name VARCHAR(30) NOT NULL, "
                    "c_phon VARCHAR(20) NOT NULL, "
@@ -86,7 +86,7 @@ int ClientManagerForm::makeId( )                                                
     }
 }
 
-void ClientManagerForm::removeItem()                                            // treewidget의 항목 제거용
+void ClientManagerForm::removeItem()                                            // treeView의 항목 제거용
 {
     QModelIndex model = ui->clienttreeView->currentIndex();                     // 선택된 항목을 저장
     QSqlDatabase db = QSqlDatabase::database("clientitemConnection");           // client DB접속

@@ -89,9 +89,9 @@ MainWindow::~MainWindow()                                               // MainW
     delete productForm;
     delete orderForm;
 
-    QStringList list = QSqlDatabase::connectionNames();
-    for(int i = 0; i < list.count(); ++i) {
-        QSqlDatabase::removeDatabase(list[i]);
+    QStringList list = QSqlDatabase::connectionNames();                 // 현재연결된 DB이름을 list에저장
+    for(int i = 0; i < list.count(); ++i) {                             // list개수만큼 iterator
+        QSqlDatabase::removeDatabase(list[i]);                          // DB 연결해제
     }
 }
 

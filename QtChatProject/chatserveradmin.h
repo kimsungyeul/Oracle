@@ -15,24 +15,24 @@ class ChatServerAdmin : public QWidget
     Q_OBJECT
 
 public:
-    explicit ChatServerAdmin(QString = "", quint16 = 0, QWidget *parent = nullptr);
-    ~ChatServerAdmin();
+    explicit ChatServerAdmin(QString = "", quint16 = 0,     // ChatServerAdmin생성자
+                             QWidget *parent = nullptr);
+    ~ChatServerAdmin();                                     // ChatServerAdmin소멸자
 
 public slots:
-    void clientChatRecv(QString,QString);
+    void clientChatRecv(QString,QString);                   // 서버에서 받은 name과 str을 받기위한 슬롯
 
 private slots:
-    void on_sendpushButton_clicked();
+    void on_sendpushButton_clicked();                       // sendbutton 클릭시 발생되는 슬롯
 
 signals:
-    //void sendData(quint16,QString);
-    void sendData(QString,QString);
+    void sendData(QString,QString);                         // server에 name과 str을 보내기위한 슬롯
 
 private:
-    Ui::ChatServerAdmin *ui;
+    Ui::ChatServerAdmin *ui;                                // Ui를 사용하기위한 멤버변수
 
-    QString cname;
-    quint16 port;
+    QString cname;                                          // 생성자 이니셜라이져로 받아온 cname저장멤버변수
+    quint16 port;                                           // 생성자 이니셜라이져로 받아온 port저장멤버변수
 };
 
 #endif // CHATSERVERADMIN_H
