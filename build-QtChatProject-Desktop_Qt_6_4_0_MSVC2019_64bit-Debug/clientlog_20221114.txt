@@ -1,0 +1,5 @@
+127.0.0.1, 8000, kimsungyeul, 안녕하세요, Mon Nov 14 17:58:15 2022
+127.0.0.1, 8000, kimsungyeul, 반갑습니다, Mon Nov 14 17:58:19 2022
+127.0.0.1, 8000, kimsungyeul, 안녕ㅋ, Mon Nov 14 19:02:50 2022
+127.0.0.1, 8000, kimsungyeul, asdcㅇㅁㅇ, Mon Nov 14 19:45:27 2022
+127.0.0.1, 8000, kimsungyeul, asdqw, Mon Nov 14 19:52:06 2022
