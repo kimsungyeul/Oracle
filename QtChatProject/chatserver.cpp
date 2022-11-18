@@ -129,7 +129,7 @@ void ChatServer::receiveData()                                                  
     qDebug() << ip << " : " << type;                                            // ip와 type 확인용 debug
 
     switch(type) {                                                              // 프로토콜에 따른 서버동작을 위한 switch문
-    case Chat_Login: {                                                          // client보낸 프로토콜이 Chat_Login 라면
+    case Chat_Login: {                                                          // client보낸 프로토콜이 Chat_Login 이라면
         if(finditem.count() == 0){                                              // 만약 등록된 이름이 아니라면(비회원이라면)
             NonMemaddClient(name);                                              // 임시멤버 id및 item 생성용 멤버함수
         } else {
@@ -145,241 +145,240 @@ void ChatServer::receiveData()                                                  
     }
         break;
 
-    case Chat_In: {                                                             // client보낸 프로토콜이 Chat_In 라면
+    case Chat_In: {                                                             // client보낸 프로토콜이 Chat_In 이라면
         foreach(auto item, finditem) {                                          // 등록된 이름들에서 finditem iterator
-            if(item->text(0) != "O" && item->text(0) != "-b") {
-                item->setText(0, "O");
+            if(item->text(0) != "O" && item->text(0) != "-b") {                 // item의 0번째인자가 "O" && "-b"가 아니라면
+                item->setText(0, "O");                                          // 0번째인자를 O로 세팅
             } else {
-                item->setText(0, "Ob");
+                item->setText(0, "Ob");                                         // 0번째인자를 Ob로 세팅
             }
-            saveitem = item->clone();
-            clientNameHash[port] = name;            // 채팅입장시 Name Hash포트에 포트에따른 이름저장
-            ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget
+            saveitem = item->clone();                                           // 임시저장용 아이템객체에 현재아이템 저장
+            clientNameHash[port] = name;                                        // 채팅입장시 Name Hash포트에 포트에따른 이름저장
+            ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget         // 선택된 인덱스를 가져와 clientWidget에서 삭제한다
                                                    ->indexOfTopLevelItem(item));
-            ui->clientTreeWidget->update();
+            ui->clientTreeWidget->update();                                     // clientTreeWidget업데이트
         }
-        ui->chatTreeWidget->addTopLevelItem(saveitem);
+        ui->chatTreeWidget->addTopLevelItem(saveitem);                          // 임시저장된 아이템을 chatTreeWidget에 세팅
 
-        ui->chatTreeWidget->resizeColumnToContents(0);
+        ui->chatTreeWidget->resizeColumnToContents(0);                          // 아이템 컬럼 정령
     }
         break;
-    case Chat_Talk: {
-        foreach(QTcpSocket *sock, clientList) {
-            if(clientNameHash.contains(sock->peerPort()) &&
-                    sock != clientConnection){          // clientList에 포함된 포트만 채팅되도록 설정
-                QByteArray sendArray;
-                sendArray.clear();
-                QDataStream out(&sendArray, QIODevice::WriteOnly);
-                out << Chat_Talk;
-                sendArray.append("<font color=lightsteelblue>");
+    case Chat_Talk: {                                                           // client보낸 프로토콜이 Chat_Talk 라면
+        foreach(QTcpSocket *sock, clientList) {                                 // clientList에 등록돤 socket들을 iterator
+            if(clientNameHash.contains(sock->peerPort()) &&                     // 소켓에서뽑은 포트가 namehash에 등록되잇거나 연결된 tcpipsocket이 iterator중인 socket과 다르다면
+                    sock != clientConnection){
+                QByteArray sendArray;                                           // datastream으로 보내기위한 데이터프레임인 bytearray선언
+                sendArray.clear();                                              // bytearray 클리어
+                QDataStream out(&sendArray, QIODevice::WriteOnly);              // bytearray형식의 datastream 선언
+                out << Chat_Talk;                                               // 처음 4바이트에 보낼메세지의 프로토콜 선언
+                sendArray.append("<font color=lightsteelblue>");                // bytearray에 보낼데이터 append
                 sendArray.append(clientNameHash[port].toStdString().data());
                 sendArray.append("</font> : ");
                 sendArray.append(name.toStdString().data());
-                sock->write(sendArray);
-                qDebug() << sock->peerPort();
+                sock->write(sendArray);                                         // socket에 쓰여진 bytearray를 write
             }
         }
 
-        if (clientWindowHash.count() != 0) {
-            clientWindowHash[clientNameHash[port]]
+        if (clientWindowHash.count() != 0) {                                    // windowhash value의 개수가 하나이상이면
+            clientWindowHash[clientNameHash[port]]                              // windowhash에 등록된 이름에대한 이름과 데이터를 clientChat에 보낸다
                     ->clientChatRecv(clientNameHash[port],data);
         }
 
-        QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);
-        logitem->setText(0, ip);
-        logitem->setText(1, QString::number(port));
-        logitem->setText(2, QString::number(clientIDHash[clientNameHash[port]]));
-        logitem->setText(3, clientNameHash[port]);
-        logitem->setText(4, QString(data));
-        logitem->setText(5, QDateTime::currentDateTime().toString());
-        logitem->setToolTip(4, QString(data));
+        QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);  // messageTreeWidget을 부모로하는 widgetitem객체 생성
+        logitem->setText(0, ip);                                                // 아이템의 0번째에 고객의 ip 세팅
+        logitem->setText(1, QString::number(port));                             // 아이템의 0번째에 고객의 port 세팅
+        logitem->setText(2, QString::number(clientIDHash[clientNameHash[port]]));// 아이템의 0번째에 고객의 ID 세팅
+        logitem->setText(3, clientNameHash[port]);                              // 아이템의 0번째에 고객의 Name 세팅
+        logitem->setText(4, QString(data));                                     // 아이템의 0번째에 고객의 채팅data 세팅
+        logitem->setText(5, QDateTime::currentDateTime().toString());           // 아이템의 0번째에 현재시간 세팅
+        logitem->setToolTip(4, QString(data));                                  // 아이템툴팁에 데이터 세팅
 
-        for(int i = 0; i < ui->messageTreeWidget->columnCount(); i++)
-            ui->messageTreeWidget->resizeColumnToContents(i);
-
-        ui->messageTreeWidget->addTopLevelItem(logitem);
-
-        logThread->appendData(logitem);
-    }
-        break;
-    case Chat_Out: {
-        foreach(auto item, findchatitem) {
-            if(item->text(0) != "-" && item->text(0) != "Ob") {
-                item->setText(0, "-");
-            } else {
-                item->setText(0, "-b");
-            }
-            saveitem = item->clone();
-            clientNameHash.remove(port);
-            ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget
-                                                 ->indexOfTopLevelItem(item));
-            ui->chatTreeWidget->update();
+        for(int i = 0; i < ui->messageTreeWidget->columnCount(); i++) {         // MessageTreeWidget의 컬럼개수만큼 iterator
+            ui->messageTreeWidget->resizeColumnToContents(i);                   // column 사이즈 재조정
         }
-        ui->clientTreeWidget->addTopLevelItem(saveitem);
-        ui->clientTreeWidget->resizeColumnToContents(0);
+
+        ui->messageTreeWidget->addTopLevelItem(logitem);                        // 세팅된 아이템을 messageTreeWidget에 추가
+
+        logThread->appendData(logitem);                                         // logThread등록하기위해 logitem데이터 append
     }
         break;
-    case Chat_LogOut:
-        if (finditem.count() != 0) {
-            foreach(auto item, finditem) {
-                if(item->text(0) != "X" && item->text(0) != "-b" &&
+    case Chat_Out: {                                                            // client보낸 프로토콜이 Chat_Out 이라면
+        foreach(auto item, findchatitem) {                                      // chattreewidget에서 검색한 item iterator
+            if(item->text(0) != "-" && item->text(0) != "Ob") {                 // item의 0번째 text가 "-" && "Ob"가 아니라면
+                item->setText(0, "-");                                          // item의 0번째 text를 "-"로 세팅
+            } else {
+                item->setText(0, "-b");                                         // item의 0번째 text를 "-b"로 세팅
+            }
+            saveitem = item->clone();                                           // 임시저장용 아이템객체에 현재아이템 저장
+            clientNameHash.remove(port);                                        // clientNameHash에 등록된 현재 port 제거
+            ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget             // 현재item을 chatTreeWidget에서 제거
+                                                 ->indexOfTopLevelItem(item));
+            ui->chatTreeWidget->update();                                       // chatTreeWidget 업데이트
+        }
+        ui->clientTreeWidget->addTopLevelItem(saveitem);                        // clientTreeWidget에 임시저장했던 item 세팅
+        ui->clientTreeWidget->resizeColumnToContents(0);                        // clientTreeWidget의 컬럼사이즈 재조정
+    }
+        break;
+    case Chat_LogOut:                                                           // client보낸 프로토콜이 Chat_LogOut 이라면
+        if (finditem.count() != 0) {                                            // clientTreeWidget에서 찾은 아이템이 하나이상 있다면
+            foreach(auto item, finditem) {                                      // 찾은 item iterator
+                if(item->text(0) != "X" && item->text(0) != "-b" &&             // item의 0번째 text가 "X" && "-b" && "Ob가 아니라면
                         item->text(0) != "Ob") {
-                    item->setText(0, "X");
+                    item->setText(0, "X");                                      // item의 0번째 text를 "X"로 세팅
                 } else {
-                    ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget
+                    ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget // clietnTreeWidget에서 현재 item 제거
                                                            ->indexOfTopLevelItem(item));
-                    ui->clientTreeWidget->update();
+                    ui->clientTreeWidget->update();                             // clientTreeiwdget 업데이트
                 }
-                clientList.removeOne(clientConnection);                                     // QList<QTcpSocket*> clientList;
-                clientSocketHash.remove(name);                                              // LogOut시 서버에 접속된 소켓 Data 삭제
-                portSocketHash.remove(port);                                                // 현재 서버에 접속된 port에대한 소켓 Data 삭제
+                clientList.removeOne(clientConnection);                         // clientList에 등록된 tcpsocket 객체 제거
+                clientSocketHash.remove(name);                                  // clientsockethash에 현재 name에 맞는 socket 제거
+                portSocketHash.remove(port);                                    // 현재 서버에 접속된 port에대한 소켓 Data 삭제
             }
         } else {
-            foreach(auto item, findchatitem) {
-                saveitem = item->clone();
-                if(item->text(0) != "X" && item->text(0) != "-b" && item->text(0) != "Ob") {
-                    item->setText(0, "X");
-                    saveitem = item->clone();
-                    ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget
+            foreach(auto item, findchatitem) {                                  // finditem이 0이라면 findchatitem에서 항목가져와
+                saveitem = item->clone();                                       // 임시저장용 아이템에 아이템복사
+                if(item->text(0) != "X" && item->text(0) != "-b"                // 현제상태 초기화
+                        && item->text(0) != "Ob") {
+                    item->setText(0, "X");                                      // 회원이면 X로 표시
+                    saveitem = item->clone();                                   // 임시저장용 아이템에 아이템복사
+                    ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget     // chatTreeWidget에 항목삭제
                                                          ->indexOfTopLevelItem(item));
-                    ui->chatTreeWidget->update();
-                    ui->clientTreeWidget->addTopLevelItem(saveitem);
-                } else {
-                    ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget
+                    ui->chatTreeWidget->update();                               // chatTreeWidget 업데이트
+                    ui->clientTreeWidget->addTopLevelItem(saveitem);            // clientTreeWidget에 항목추가
+                } else {                                                        // 비회원이라면
+                    ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget     // chatTreeWidget에서 item삭제
                                                          ->indexOfTopLevelItem(item));
-                    ui->chatTreeWidget->update();
+                    ui->chatTreeWidget->update();                               // chatTreeWidget 업데이트
                 }
-                clientList.removeOne(clientConnection);                                         // QList<QTcpSocket*> clientList;
-                clientSocketHash.remove(name);                                                  // LogOut시 서버에 접속된 소켓 Data 삭제
-                portSocketHash.remove(port);                                                    // 현재 서버에 접속된 port에대한 소켓 Data 삭제
+                clientList.removeOne(clientConnection);                         // QList<QTcpSocket*> clientList;
+                clientSocketHash.remove(name);                                  // LogOut시 서버에 접속된 소켓 Data 삭제
+                portSocketHash.remove(port);                                    // portSocketHash의 port삭제
             }
         }
         break;
     }
 }
 
-void ChatServer::removeClient()
+void ChatServer::removeClient()                                                 // 클라이언트가 서버를 나갈때 함수
 {
-    QTcpSocket *clientConnection = dynamic_cast<QTcpSocket *>(sender( ));
-    clientList.removeOne(clientConnection);
-    clientConnection->deleteLater();
-    QString name = clientNameHash[clientConnection->peerPort()];
-    auto finditem = ui->clientTreeWidget->findItems(name, Qt::MatchContains, 1);
-    foreach(auto item, finditem) {
+    QTcpSocket *clientConnection = dynamic_cast<QTcpSocket *>(sender( ));       // 서버를 나간 클라이언트 소켓 을 sender로 받아옴
+    clientList.removeOne(clientConnection);                                     // clientList에서 소켓삭제
+    clientConnection->deleteLater();                                            // 소켓이 삭제될때 발동
+    QString name = clientNameHash[clientConnection->peerPort()];                // clientNameHash에서 name추출
+    auto finditem = ui->clientTreeWidget->findItems(name, Qt::MatchContains, 1);// clientTreeWidget원하는 name추출
+    foreach(auto item, finditem) {                                              // finditem에 item검색
         if (finditem.count() != 0) {
-            item->setText(0, "X");
+            item->setText(0, "X");                                              // 현재상태를 X로 변경
         }
     }
 
-    clientList.removeOne(clientConnection);
-    clientConnection->deleteLater();
+    clientList.removeOne(clientConnection);                                     // clientList에서 소켓삭제
+    clientConnection->deleteLater();                                            // 소켓이 삭제될때 발동
 }
 
-void ChatServer::addClient(int id, QString name)
+void ChatServer::addClient(int id, QString name)                                // clientmanager에서 등록or modify시 addclient slot발생
 {
-    clientIDList << id;
-    QTreeWidgetItem* item = new QTreeWidgetItem(ui->clientTreeWidget);
-    item->setText(0, "X");
-    item->setText(1, name);
-    ui->clientTreeWidget->addTopLevelItem(item);
-    clientIDHash[name] = id;
-    ui->clientTreeWidget->resizeColumnToContents(0);
+    clientIDList << id;                                                         // addclient에 받아온 id를 clientIdList에 등록
+    QTreeWidgetItem* item = new QTreeWidgetItem(ui->clientTreeWidget);          // ClientTreewidget에 선택한 아이템을 객체로 복사
+    item->setText(0, "X");                                                      // 현재상태 X로 초기화
+    item->setText(1, name);                                                     // name 세팅
+    ui->clientTreeWidget->addTopLevelItem(item);                                // clientTreeWidget에 항목추가
+    clientIDHash[name] = id;                                                    // clientIDHash에 이름에따른 id추가
+    ui->clientTreeWidget->resizeColumnToContents(0);                            // clientTreeWidget에 항목 추가시 자등으로 column정렬
 }
 
-int ChatServer::makeNonId()
+int ChatServer::makeNonId()                                                     // 비회원 아이디 등록
 {
-    if(clientIDList.size( ) == 0) {
-        return 10000;
-    } else {
-        auto id = clientIDList.back();
-        return ++id;
+    if(clientIDList.size( ) == 0) {                                             // clientList에 등록이 안됫다면
+        return 10000;                                                           // 10000번부터 id부여
+    } else {                                                                    // clientList에 Id가 하나라도 잇다면
+        auto id = clientIDList.back();                                          // clientList의 마지막값을가져와
+        return ++id;                                                            // +1된 값으로 id 지정
     }
 }
 
-void ChatServer::NonMemaddClient(QString name)
+void ChatServer::NonMemaddClient(QString name)                                  // 비회원 이름등록
 {
-    int id = makeNonId();
-    clientIDList << id;
-    QTreeWidgetItem* item = new QTreeWidgetItem(ui->clientTreeWidget);
-    item->setText(0, "-b");
-    item->setText(1, name);
-    ui->clientTreeWidget->addTopLevelItem(item);
-    clientIDHash[name] = id;
-    ui->clientTreeWidget->resizeColumnToContents(0);
+    int id = makeNonId();                                                       // 비회원 ID등록
+    clientIDList << id;                                                         // clientIDList에 id등록
+    QTreeWidgetItem* item = new QTreeWidgetItem(ui->clientTreeWidget);          // clientTreeWidget에 item가져와 객체생성
+    item->setText(0, "-b");                                                     // 비회원 처음등록후 -b상태 초기화
+    item->setText(1, name);                                                     // 비회원 이름 초기화
+    ui->clientTreeWidget->addTopLevelItem(item);                                // clientTreeWidget에 항목추가
+    clientIDHash[name] = id;                                                    // clientIDHash에 이름에따른 id 추가
+    ui->clientTreeWidget->resizeColumnToContents(0);                            // clientTreeWidget에 항목 추가시 자등으로 column정렬
 }
 
-void ChatServer::kickOut()
+void ChatServer::kickOut()                                                      // 클라이언트 강퇴
 {
-    if(ui->clientTreeWidget->currentItem() == nullptr) {
+    if(ui->clientTreeWidget->currentItem() == nullptr) {                        // 선택된클라이언트가 없을시 리턴
         return;
     }
 
-    if(ui->chatTreeWidget->topLevelItemCount()) {
-        QString name = ui->chatTreeWidget->currentItem()->text(1);
-        QTcpSocket* sock = clientSocketHash[name];          // sockethash에 이름에맞는 socket 데이터를 sock에 저장
-        quint16 port = sock->peerPort();
-        QByteArray sendArray;
-        QDataStream out(&sendArray, QIODevice::WriteOnly);
-        out << Chat_KickOut;
-        out.writeRawData("", 1020);
+    if(ui->chatTreeWidget->topLevelItemCount()) {                               // chatTreeWidget에 항목이 존재한다면
+        QString name = ui->chatTreeWidget->currentItem()->text(1);              // 선택된 항목의 이름을 name으로 등록
+        QTcpSocket* sock = clientSocketHash[name];                              // sockethash에 이름에맞는 socket 데이터를 sock에 저장
+        quint16 port = sock->peerPort();                                        // 소켓에포트를 등록
+        QByteArray sendArray;                                                   // 보낼ByteArray 생성
+        QDataStream out(&sendArray, QIODevice::WriteOnly);                      // 데이터 출력스트림 생성
+        out << Chat_KickOut;                                                    // 첫번째 인자로 type입력
+        out.writeRawData("", 1020);                                             // type data인 4비트 제외 1020데이터에 빈내용 입력
 
-        sock->write(sendArray);                             // 아래코드처럼 궂이 안찾아도 바로 찾은 소켓에 쓰면됨
+        sock->write(sendArray);                                                 // 소켓에 데이터를 써서 보냄
 
-        auto findchatitem = ui->chatTreeWidget->findItems(name, Qt::MatchFixedString, 1);
-        QTreeWidgetItem* saveitem;
-        foreach (auto item, findchatitem) {
-            if(item->text(0) != "-" && item->text(0) != "Ob") {
-                item->setText(0, "-");
+        auto findchatitem = ui->chatTreeWidget->findItems(name,                 // chatTreeWidget에서 원하는 name 찾기
+                                                          Qt::MatchFixedString, 1);
+        QTreeWidgetItem* saveitem;                                              // 임시등록용 item객체생성
+        foreach (auto item, findchatitem) {                                     // 선택된 아이템 등록
+            if(item->text(0) != "-" && item->text(0) != "Ob") {                 // 상태 초기화
+                item->setText(0, "-");                                          // 회원이라면 -
             } else {
-                item->setText(0, "-b");
+                item->setText(0, "-b");                                         // 비회원이라면 -b
             }
-            saveitem = item->clone();
-            clientNameHash.remove(port);
-            ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget
+            saveitem = item->clone();                                           // item항목 복사
+            clientNameHash.remove(port);                                        // clientNameHash에 port제거
+            ui->chatTreeWidget->takeTopLevelItem(ui->chatTreeWidget             // chatTreeWidget 의 선택한 item 제거
                                                  ->indexOfTopLevelItem(item));
-            ui->chatTreeWidget->update();
+            ui->chatTreeWidget->update();                                       // chatTreeWidget 업데이트
         }
-        ui->clientTreeWidget->addTopLevelItem(saveitem);
-        ui->clientTreeWidget->resizeColumnToContents(0);
+        ui->clientTreeWidget->addTopLevelItem(saveitem);                        // 복사된 item항목 clientTreeWidget에 등록
+        ui->clientTreeWidget->resizeColumnToContents(0);                        // clientTreeWidget에 항목 추가시 자등으로 column정렬
     }
 }
 
-void ChatServer::inviteClient()
+void ChatServer::inviteClient()                                                 // 클라이언트 초대
 {
-    if(ui->clientTreeWidget->currentItem() == nullptr ||
+    if(ui->clientTreeWidget->currentItem() == nullptr ||                        // clientTreeWidget에 선택된아이템이 없다면
             ui->clientTreeWidget->currentItem()->text(0) == "X") {
         return;
     }
-    if(ui->clientTreeWidget->topLevelItemCount()) {
-        QString name = ui->clientTreeWidget->currentItem()->text(1);
-        //quint16 port = clientNameHash.key(name, -1);      //포트비교를위해 선언하였으나 소켓Hash에서 이름검색후 바로 쓰면되므로 삭제
 
-        //chatProtocolType data;
-        QByteArray sendArray;
-        QDataStream out(&sendArray, QIODevice::WriteOnly);
-        out << Chat_Invite;
-        out.writeRawData("", 1020);
-        QTcpSocket* sock = clientSocketHash[name];
-        quint16 port = sock->peerPort();
-        sock->write(sendArray);                 // iterator로 비교안해도 소켓에 바로쓰면됨
-        auto finditem = ui->clientTreeWidget->findItems(name, Qt::MatchFixedString, 1);
-        qDebug() << "5";
-        QTreeWidgetItem* saveitem = new QTreeWidgetItem;
-        qDebug() << "6";
-        foreach (auto item, finditem) {
-            if(item->text(0) != "O" && item->text(0) != "-b") {
-                item->setText(0, "O");
+    if(ui->clientTreeWidget->topLevelItemCount()) {                             // clientTreeWidget에 아이템항목이 하나라도 잇다면
+        QString name = ui->clientTreeWidget->currentItem()->text(1);            // clientTreeWidget의 이름을 가져와 등록
+        QByteArray sendArray;                                                   // 데이터 출력용 변수선언
+        QDataStream out(&sendArray, QIODevice::WriteOnly);                      // 데이터 출력용 스트림 생성
+        out << Chat_Invite;                                                     // Chat_Invite의 첫인자로 입력
+        out.writeRawData("", 1020);                                             // 나머지 1020비트 에 빈데이터 입력
+        QTcpSocket* sock = clientSocketHash[name];                              // clientSocketHash에 이름으로 등록된 소켓가져옴
+        quint16 port = sock->peerPort();                                        // 소켓에서 포트추출
+        sock->write(sendArray);                                                 // iterator로 비교안해도 소켓에 바로쓰면됨
+        auto finditem = ui->clientTreeWidget->findItems(name,                   // clientTreeWidget에 원하는 item찾기
+                                                        Qt::MatchFixedString, 1);
+        QTreeWidgetItem* saveitem = new QTreeWidgetItem;                        // 임시저장용 item 객체생성
+        foreach (auto item, finditem) {                                         // 찾은 item정보 추출
+            if(item->text(0) != "O" && item->text(0) != "-b") {                 // 상태 초기화
+                item->setText(0, "O");                                          // 회원이면 O상태
             } else {
-                item->setText(0, "Ob");
+                item->setText(0, "Ob");                                         // 비회원이면 Ob상태
             }
-            saveitem = item->clone();
-            ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget
+            saveitem = item->clone();                                           // 임시저장객체에 복사
+            ui->clientTreeWidget->takeTopLevelItem(ui->clientTreeWidget         // clientTreeWidget에 선택item 제거
                                                    ->indexOfTopLevelItem(item));
-            ui->clientTreeWidget->update();
+            ui->clientTreeWidget->update();                                     // clientTreeWidget항목 업데이트
         }
-        clientNameHash[port] = name;
-        ui->chatTreeWidget->addTopLevelItem(saveitem);
-        ui->chatTreeWidget->resizeColumnToContents(0);
+        clientNameHash[port] = name;                                            // clientNameHash에 포트로 이름등록
+        ui->chatTreeWidget->addTopLevelItem(saveitem);                          // 임시생성item을 chatTreeWidget에 등록
+        ui->chatTreeWidget->resizeColumnToContents(0);                          // clientNameHash에 항목 추가시 자등으로 column정렬
     }
 }
 
@@ -403,7 +402,7 @@ void ChatServer::on_chatTreeWidget_customContextMenuRequested(const QPoint &pos)
 
     QPoint globalPos = ui->chatTreeWidget->mapToGlobal(pos);
     if(ui->chatTreeWidget->indexAt(pos).isValid()){
-       chatmenu->exec(globalPos);
+        chatmenu->exec(globalPos);
     }
 }
 
@@ -504,8 +503,8 @@ void ChatServer::privateChatSend(QString name, QString str)
 
 
     QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);
-    logitem->setText(1, QString::number(port));
-    logitem->setText(2, "Admin");
+    logitem->setText(1, "Server");
+    logitem->setText(2, "Private");
     logitem->setText(3, "Admin");
     logitem->setText(4, str);
     logitem->setText(5, QDateTime::currentDateTime().toString());
@@ -552,7 +551,7 @@ void ChatServer::noticeChatSend(QString str)
         sock->write(sendArray);
     }
     QTreeWidgetItem *logitem = new QTreeWidgetItem(ui->messageTreeWidget);
-    logitem->setText(1, "Notice");
+    logitem->setText(1, "Server");
     logitem->setText(2, "Notice");
     logitem->setText(3, "Admin");
     logitem->setText(4, str);
